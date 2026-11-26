@@ -152,20 +152,39 @@ impl Parser {
                     }
                     "line" | "task" | "section" => {
                         let mut words = Vec::new();
-                        if val.starts_with('(') {
-                            words.push(val.trim_start_matches('(').to_string());
-                            let mut depth = 1;
-                            while depth > 0 {
+                        // tokenizer 会把 ( 和 ) 拆成独立 token: "line:" "(" "w1" "w2" ")"
+                        if val == "(" || val.is_empty() {
+                            let mut depth = 1usize;
+                            loop {
                                 match self.next() {
                                     None => break,
                                     Some(t) if t == "(" => depth += 1,
-                                    Some(t) if t == ")" => depth -= 1,
-                                    Some(t) => words.push(t.trim_matches(|c| c == '(' || c == ')').to_string()),
+                                    Some(t) if t == ")" => {
+                                        depth -= 1;
+                                        if depth == 0 { break; }
+                                    }
+                                    Some(t) => words.push(t),
+                                }
+                            }
+                        } else if val.starts_with('(') {
+                            let inner = val.trim_start_matches('(');
+                            if !inner.is_empty() { words.push(inner.to_string()); }
+                            let mut depth = 1usize;
+                            loop {
+                                match self.next() {
+                                    None => break,
+                                    Some(t) if t == "(" => depth += 1,
+                                    Some(t) if t == ")" => {
+                                        depth -= 1;
+                                        if depth == 0 { break; }
+                                    }
+                                    Some(t) => words.push(t),
                                 }
                             }
                         } else {
-                            words.push(val.trim_matches('(').to_string());
+                            words.push(val.to_string());
                         }
+                        words.retain(|w| !w.is_empty());
                         return Some(Node::Line(words));
                     }
                     _ => {}
