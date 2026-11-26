@@ -1,10 +1,10 @@
-// ob-search — 检索模块
+// ob-search — 检索模块 | Retrieval module
 use ob_core::cmds;
 use ob_core::common;
 
 fn usage() -> ! {
     eprintln!(
-        "ob-search — 检索模块
+        "ob-search — 检索模块 | Retrieval module
 
 USAGE:
   ob-search search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]

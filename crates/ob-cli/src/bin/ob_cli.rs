@@ -6,7 +6,7 @@ use ob_core::common;
 
 fn usage() -> ! {
     eprintln!(
-        "ob-cli — Obsidian vault 总入口
+        "ob-cli — Obsidian vault 总入口 | Unified entry + MCP server
 
 USAGE:
   ob-cli <command> ...          # 覆盖 ob-search / ob-ops 全部命令, 自动路由

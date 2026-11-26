@@ -10,3 +10,4 @@ path = "src/bin/ob_search.rs"
 [dependencies]
 ob-core = { path = "../ob-core" }
 regex = "1"
+description = "Retrieval module: Obsidian-syntax search, fuzzy match, backlinks/links, hybrid, link-graph traversal"

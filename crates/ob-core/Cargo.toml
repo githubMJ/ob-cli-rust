@@ -3,7 +3,7 @@ name = "ob-core"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "Shared core: vault model, Obsidian query engine, note CRUD"
+description = "Shared core: vault model, Obsidian query engine, note CRUD (文档层/检索层/操作层共享核心)"
 
 [dependencies]
 regex = "1"

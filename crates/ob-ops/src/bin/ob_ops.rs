@@ -1,10 +1,10 @@
-// ob-ops — 操作模块
+// ob-ops — 操作模块 | Operations module
 use ob_core::cmds;
 use ob_core::common;
 
 fn usage() -> ! {
     eprintln!(
-        "ob-ops — 操作模块
+        "ob-ops — 操作模块 | Operations module
 
 USAGE:
   ob-ops create <title> [--content <text>] [--path <vault>]

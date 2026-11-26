@@ -9,3 +9,4 @@ path = "src/bin/ob_ops.rs"
 
 [dependencies]
 ob-core = { path = "../ob-core" }
+description = "Operations module: note create/delete/move (link-aware), frontmatter, tags, vault health"

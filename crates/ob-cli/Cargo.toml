@@ -10,3 +10,4 @@ path = "src/bin/ob_cli.rs"
 [dependencies]
 ob-core = { path = "../ob-core" }
 regex = "1"
+description = "Unified entry point for all commands + MCP stdio server for AI agents"
