@@ -104,7 +104,7 @@ line:(word1 word2)   同一行同时出现
 ## 粒度控制
 
 ```bash
-ob-cli-rust search "归并排序" --path <vault>   # 文件级
+ob-cli search "归并排序" --path <vault>   # 文件级
   --lines                # + 命中行+行号
   --context=2 --lines    # + 前后 2 行上下文
   --paragraph            # + 命中所在完整段落
@@ -116,16 +116,14 @@ ob-cli-rust search "归并排序" --path <vault>   # 文件级
 
 ```bash
 # 复杂检索: Wiki 目录下带广告标签、排除 Inbox 的笔记, 返回段落
-ob-cli-rust search "RTA tag:#广告 -00-Inbox" --path ~/vault --paragraph
+ob-cli search "RTA tag:#广告 -00-Inbox" --path ~/vault --paragraph
 
 # 图检索: 从一篇笔记出发 3 跳双向遍历
-ob-cli-rust graph "1.4 - 归并排序" --path ~/vault --depth=3
+ob-cli graph "1.4 - 归并排序" --path ~/vault --depth=3
 
 # 重命名笔记, 全库链接自动更新
-ob-cli-rust move "旧标题" "新目录/新标题" --path ~/vault
+ob-cli move "旧标题" "新目录/新标题" --path ~/vault
 
-# MCP: agent 接入
-ob-cli-rust serve --path ~/vault
 ```
 
 ## 性能
