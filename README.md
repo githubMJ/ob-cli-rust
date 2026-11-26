@@ -1,4 +1,4 @@
-# notesmd-rs
+# ob-cli-rust
 
 Rust 实现的 Obsidian vault CLI + MCP server。单静态二进制（~1.6MB），零运行时依赖，支持本地知识库的全栈检索、双向链接分析、图谱遍历与笔记管理。
 
