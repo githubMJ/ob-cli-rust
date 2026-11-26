@@ -1,4 +1,5 @@
 [package]
+description = "Retrieval module: Obsidian-syntax search, fuzzy match, backlinks/links, hybrid, link-graph traversal"
 name = "ob-search"
 version = "0.1.0"
 edition = "2021"
@@ -10,4 +11,3 @@ path = "src/bin/ob_search.rs"
 [dependencies]
 ob-core = { path = "../ob-core" }
 regex = "1"
-description = "Retrieval module: Obsidian-syntax search, fuzzy match, backlinks/links, hybrid, link-graph traversal"
