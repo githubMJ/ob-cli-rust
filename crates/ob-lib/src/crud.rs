@@ -299,6 +299,47 @@ pub fn unresolved(vault: &Path) {
     eprintln!("\n{} unresolved links", out.len());
 }
 
+/// append: 追加内容到笔记末尾
+pub fn append(vault: &Path, title: &str, content: &str) {
+    let path = find_note(vault, title).unwrap_or_else(|| {
+        eprintln!("Note not found: {title}");
+        std::process::exit(1);
+    });
+    let mut existing = std::fs::read_to_string(&path).unwrap();
+    if !existing.ends_with('\n') {
+        existing.push('\n');
+    }
+    existing.push_str(content);
+    existing.push('\n');
+    std::fs::write(&path, existing).unwrap();
+    println!("Appended to: {}", path.display());
+}
+
+/// dirs: 列出 vault 中的目录结构
+pub fn dirs(vault: &Path) {
+    let mut set = std::collections::BTreeSet::new();
+    fn walk(dir: &Path, root: &Path, set: &mut std::collections::BTreeSet<String>) {
+        if let Ok(rd) = std::fs::read_dir(dir) {
+            for e in rd.filter_map(|e| e.ok()) {
+                let p = e.path();
+                let name = p.file_name().unwrap().to_string_lossy().to_string();
+                if p.is_dir() {
+                    if !name.starts_with('.') {
+                        if let Ok(rel) = p.strip_prefix(root) {
+                            set.insert(rel.to_string_lossy().to_string());
+                        }
+                        walk(&p, root, set);
+                    }
+                }
+            }
+        }
+    }
+    walk(vault, vault, &mut set);
+    for d in set {
+        println!("{d}/");
+    }
+}
+
 /// hdaily: 无头每日笔记
 pub fn hdaily(vault: &Path, dir: &str, template: Option<&str>) {
     let date = chrono_today();

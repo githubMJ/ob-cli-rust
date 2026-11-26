@@ -16,7 +16,9 @@ USAGE:
   ob-core tags [tag]           [--path <vault>]
   ob-core orphans              [--path <vault>]
   ob-core unresolved           [--path <vault>]
-  ob-core hdaily [dir]         [--path <vault>]"
+  ob-core hdaily [dir]         [--path <vault>]
+  ob-core append <note> --content <text> [--path <vault>]   # 追加内容
+  ob-core dirs                 [--path <vault>]            # 列出目录结构"
     );
     std::process::exit(1)
 }
@@ -42,6 +44,12 @@ fn main() {
         "orphans" => cmds::stats::run_orphans(&ctx),
         "unresolved" => cmds::stats::run_unresolved(&ctx),
         "hdaily" => cmds::docs::run_hdaily(&ctx),
+        "append" => {
+            let (title, content) = (ctx.pos_args.get(1).cloned().unwrap_or_else(|| usage()),
+                                    ctx.kv.iter().find(|(k,_)| k=="content").map(|(_,v)| v.clone()).unwrap_or_default());
+            ob_lib::crud::append(&ctx.vp, &title, &content);
+        }
+        "dirs" => ob_lib::crud::dirs(&ctx.vp),
         _ => usage(),
     }
 }
