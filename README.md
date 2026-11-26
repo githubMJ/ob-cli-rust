@@ -82,7 +82,3 @@ notesmd-rs serve --path ~/vault
 ## 性能
 
 516 篇 / 158MB 真实库：全量检索 ~150ms（CPU 时间），单二进制 1.6MB。瓶颈在磁盘 IO；每次调用全量扫描，无索引文件，笔记改动即时生效。
-
-## License
-
-MIT（继承上游 Yakitrak/notesmd-cli）
