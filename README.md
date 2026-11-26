@@ -23,20 +23,30 @@ target/release/ob-cli-rust
 
 ```
 src/
-├── main.rs     # 入口 + 命令分发 + MCP server (serve) + 参数解析
-├── vault.rs    # 【文档层】vault 遍历、文档模型、frontmatter/行内标签解析、链接索引
-├── query.rs    # 【检索层】Obsidian 兼容查询语法解析器 + 匹配引擎 + 模糊匹配
-└── crud.rs     # 【操作层】笔记增删改、重命名更新链接、frontmatter 读写、标签/健康分析
+├── main.rs          # 【入口】参数解析 + 命令分发
+├── common.rs        # 【共享】Ctx 上下文、usage、笔记查找、行工具
+├── vault.rs         # 【文档层】vault 遍历、文档模型、frontmatter/行内标签解析、链接索引
+├── query.rs         # 【检索层】Obsidian 兼容查询语法解析器 + 匹配引擎 + 模糊匹配
+├── crud.rs          # 【操作层实现】move/delete/frontmatter/tags/orphans/unresolved/hdaily
+├── json.rs          # 【JSON】零依赖 JSON 解析/序列化
+├── mcp.rs           # 【MCP】stdio server (search_notes/read_note/backlinks/list_notes)
+└── commands/        # 【命令层】按功能分类的命令入口
+    ├── search.rs    #   检索: search (语法/模糊/段落/上下文/JSON)
+    ├── graph.rs     #   检索: graph 多跳图遍历
+    ├── hybrid.rs    #   检索: hybrid 混合检索
+    ├── links.rs     #   检索: backlinks / links 双向链接
+    ├── docs.rs      #   操作: create/print/list/move/delete/frontmatter/hdaily
+    └── stats.rs     #   展示: tags/orphans/unresolved
 ```
 
 ### 按功能分类
 
 | 分类 | 命令 |
 |---|---|
-| **检索类** | `search`（Obsidian 语法：AND/OR/`-排除`/`"短语"`/`path:`/`file:`/`tag:`/`line:`，支持 `--fuzzy` 模糊 / `--lines` 行级 / `--context=N` 上下文 / `--paragraph` 段落级 / `--links` 双链扩展 / `--json`）、`hybrid`（关键词+双链一跳）、`graph`（多跳图遍历 `--depth=N`）、`backlinks`（反向链接）、`links`（正向链接） |
-| **文档/目录操作类** | `create`（新建，自动建目录）、`move`（重命名/移动并自动更新全库链接）、`delete`（删除）、`print`（读全文）、`frontmatter`（YAML 属性 get/set/remove）、`hdaily`（无头每日笔记） |
-| **列表/统计展示类** | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
-| **Agent 接入类** | `serve`（MCP stdio server：search_notes / read_note / backlinks / list_notes） |
+| **检索类** → `commands/search.rs` `graph.rs` `hybrid.rs` `links.rs` | `search`（Obsidian 语法：AND/OR/`-排除`/`"短语"`/`path:`/`file:`/`tag:`/`line:`，支持 `--fuzzy` 模糊 / `--lines` 行级 / `--context=N` 上下文 / `--paragraph` 段落级 / `--links` 双链扩展 / `--json`）、`hybrid`（关键词+双链一跳）、`graph`（多跳图遍历 `--depth=N`）、`backlinks`（反向链接）、`links`（正向链接） |
+| **文档/目录操作类** → `commands/docs.rs` | `create`（新建，自动建目录）、`move`（重命名/移动并自动更新全库链接）、`delete`（删除）、`print`（读全文）、`frontmatter`（YAML 属性 get/set/remove）、`hdaily`（无头每日笔记） |
+| **列表/统计展示类** → `commands/stats.rs` | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
+| **Agent 接入类** → `mcp.rs` | `serve`（MCP stdio server：search_notes / read_note / backlinks / list_notes） |
 
 ## 查询语法（与 Obsidian 一致）
 
