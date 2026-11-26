@@ -3,7 +3,7 @@ name = "ob-cli-rust"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "High-performance CLI + MCP server for Obsidian vaults (Rust rewrite of notesmd-cli enhancements)"
+description = "High-performance CLI + MCP server for Obsidian vaults"
 
 [dependencies]
 regex = "1"

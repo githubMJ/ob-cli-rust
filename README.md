@@ -11,10 +11,10 @@ cargo build --release
 # Linux x86_64 交叉编译 (macOS 上, 静态二进制)
 rustup target add x86_64-unknown-linux-musl
 cargo build --release --target x86_64-unknown-linux-musl
-# 产物: target/x86_64-unknown-linux-musl/release/notesmd-rs
+# 产物: target/x86_64-unknown-linux-musl/release/ob-cli-rust
 
 # 产物位置
-target/release/notesmd-rs
+target/release/ob-cli-rust
 ```
 
 要求 Rust 1.75+。依赖仅 `regex` 一个 crate。
@@ -55,7 +55,7 @@ line:(word1 word2)   同一行同时出现
 ## 粒度控制
 
 ```bash
-notesmd-rs search "归并排序" --path <vault>   # 文件级
+ob-cli-rust search "归并排序" --path <vault>   # 文件级
   --lines                # + 命中行+行号
   --context=2 --lines    # + 前后 2 行上下文
   --paragraph            # + 命中所在完整段落
@@ -67,16 +67,16 @@ notesmd-rs search "归并排序" --path <vault>   # 文件级
 
 ```bash
 # 复杂检索: Wiki 目录下带广告标签、排除 Inbox 的笔记, 返回段落
-notesmd-rs search "RTA tag:#广告 -00-Inbox" --path ~/vault --paragraph
+ob-cli-rust search "RTA tag:#广告 -00-Inbox" --path ~/vault --paragraph
 
 # 图检索: 从一篇笔记出发 3 跳双向遍历
-notesmd-rs graph "1.4 - 归并排序" --path ~/vault --depth=3
+ob-cli-rust graph "1.4 - 归并排序" --path ~/vault --depth=3
 
 # 重命名笔记, 全库链接自动更新
-notesmd-rs move "旧标题" "新目录/新标题" --path ~/vault
+ob-cli-rust move "旧标题" "新目录/新标题" --path ~/vault
 
 # MCP: agent 接入
-notesmd-rs serve --path ~/vault
+ob-cli-rust serve --path ~/vault
 ```
 
 ## 性能

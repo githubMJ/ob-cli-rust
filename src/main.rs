@@ -1,4 +1,4 @@
-// main.rs — notesmd-rs: Rust CLI + MCP server for Obsidian vaults
+// main.rs — ob-cli-rust: CLI + MCP server for Obsidian vaults
 mod crud;
 mod query;
 mod vault;
@@ -11,25 +11,25 @@ use vault::{build_link_index, extract_links, Doc};
 
 fn usage() -> ! {
     eprintln!(
-        "notesmd-rs — Obsidian vault CLI + MCP server (Rust)
+        "ob-cli-rust — Obsidian vault CLI + MCP server
 
 USAGE:
-  notesmd-rs search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]
-  notesmd-rs backlinks <note> [--path <vault>] [--json]
-  notesmd-rs links <note>     [--path <vault>]
-  notesmd-rs hybrid <query>   [--path <vault>] [--max N]
-  notesmd-rs graph <note>     [--path <vault>] [--depth N]   # n-hop link graph BFS
-  notesmd-rs list             [--path <vault>]
-  notesmd-rs print <note>     [--path <vault>]
-  notesmd-rs create <title> [--content <text>] [--path <vault>]
-  notesmd-rs move <from> <to> [--path <vault>]    # rename + update all links
-  notesmd-rs delete <note> [--force] [--path <vault>]
-  notesmd-rs frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
-  notesmd-rs tags [tag]       [--path <vault>]    # tag list or notes-by-tag
-  notesmd-rs orphans          [--path <vault>]
-  notesmd-rs unresolved       [--path <vault>]
-  notesmd-rs hdaily [dir]     [--path <vault>]    # headless daily note
-  notesmd-rs serve            [--path <vault>]    # MCP stdio server
+  ob-cli-rust search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]
+  ob-cli-rust backlinks <note> [--path <vault>] [--json]
+  ob-cli-rust links <note>     [--path <vault>]
+  ob-cli-rust hybrid <query>   [--path <vault>] [--max N]
+  ob-cli-rust graph <note>     [--path <vault>] [--depth N]   # n-hop link graph BFS
+  ob-cli-rust list             [--path <vault>]
+  ob-cli-rust print <note>     [--path <vault>]
+  ob-cli-rust create <title> [--content <text>] [--path <vault>]
+  ob-cli-rust move <from> <to> [--path <vault>]    # rename + update all links
+  ob-cli-rust delete <note> [--force] [--path <vault>]
+  ob-cli-rust frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
+  ob-cli-rust tags [tag]       [--path <vault>]    # tag list or notes-by-tag
+  ob-cli-rust orphans          [--path <vault>]
+  ob-cli-rust unresolved       [--path <vault>]
+  ob-cli-rust hdaily [dir]     [--path <vault>]    # headless daily note
+  ob-cli-rust serve            [--path <vault>]    # MCP stdio server
 
 QUERY SYNTAX (Obsidian compatible):
   word1 word2 = AND | OR = or | -word = exclude | \"phrase\" = exact
@@ -507,7 +507,7 @@ fn run_mcp(vp: &PathBuf) {
         let id = v.get("id").cloned().unwrap_or(Json::Null);
         let method = v.get("method").and_then(|m| m.as_str()).unwrap_or("");
         let result = match method {
-            "initialize" => r#"{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"notesmd-rs","version":"0.1.0"}}"#.to_string(),
+            "initialize" => r#"{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"ob-cli-rust","version":"0.1.0"}}"#.to_string(),
             "tools/list" => TOOLS_LIST.to_string(),
             "tools/call" => {
                 let name = v.get("params").and_then(|p| p.get("name")).and_then(|x| x.as_str()).unwrap_or("");
