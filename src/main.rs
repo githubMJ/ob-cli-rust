@@ -1,4 +1,5 @@
 // main.rs — notesmd-rs: Rust CLI + MCP server for Obsidian vaults
+mod crud;
 mod query;
 mod vault;
 
@@ -20,6 +21,13 @@ USAGE:
   notesmd-rs list             [--path <vault>]
   notesmd-rs print <note>     [--path <vault>]
   notesmd-rs create <title> [--content <text>] [--path <vault>]
+  notesmd-rs move <from> <to> [--path <vault>]    # rename + update all links
+  notesmd-rs delete <note> [--force] [--path <vault>]
+  notesmd-rs frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
+  notesmd-rs tags [tag]       [--path <vault>]    # tag list or notes-by-tag
+  notesmd-rs orphans          [--path <vault>]
+  notesmd-rs unresolved       [--path <vault>]
+  notesmd-rs hdaily [dir]     [--path <vault>]    # headless daily note
   notesmd-rs serve            [--path <vault>]    # MCP stdio server
 
 QUERY SYNTAX (Obsidian compatible):
@@ -328,6 +336,25 @@ fn main() {
             println!("Created: {}", path.display());
         }
 
+        "move" => {
+            let (from, to) = (pos_args.get(1).unwrap_or_else(|| usage()), pos_args.get(2).unwrap_or_else(|| usage()));
+            crud::mv(&vp, from, to);
+        }
+        "delete" => {
+            let title = pos_args.get(1).unwrap_or_else(|| usage());
+            crud::delete(&vp, title, has("--force"));
+        }
+        "frontmatter" => {
+            let title = pos_args.get(1).unwrap_or_else(|| usage());
+            let action = pos_args.get(2).map(|s| s.as_str()).unwrap_or("get");
+            let key = pos_args.get(3).map(|s| s.as_str()).unwrap_or("");
+            let value = pos_args.get(4).cloned();
+            crud::frontmatter(&vp, title, action, key, value);
+        }
+        "tags" => crud::tags(&vp, pos_args.get(1).map(|s| s.as_str())),
+        "orphans" => crud::orphans(&vp),
+        "unresolved" => crud::unresolved(&vp),
+        "hdaily" => crud::hdaily(&vp, pos_args.get(1).map(|s| s.as_str()).unwrap_or("05-Daily"), None),
         "serve" => run_mcp(&vp),
 
         _ => usage(),

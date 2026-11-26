@@ -6,7 +6,12 @@ Rust 实现的 Obsidian vault CLI + MCP server（参考 notesmd-cli Go 增强版
 - `search` — Obsidian 兼容搜索语法 (AND/OR/-排除/"短语"/path:/file:/tag:/line:)
 - `backlinks` / `links` — 双向链接
 - `hybrid` — 关键词检索 + 双链一跳扩展
-- `list` / `print` / `create` — 笔记基础操作
+- `list` / `print` / `create` / `delete` — 笔记基础操作
+- `move` — 重命名/移动并自动更新全库 [[链接]]
+- `frontmatter` — YAML 属性读/改/删
+- `tags` — 标签统计与按标签检索 (frontmatter + 行内 #tag)
+- `orphans` / `unresolved` — 孤立笔记与断链检测
+- `hdaily` — 无头每日笔记
 - `serve` — MCP stdio server (search_notes/read_note/backlinks/list_notes)
 
 ## 构建
