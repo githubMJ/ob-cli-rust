@@ -1,6 +1,6 @@
 # ob-cli-rust
 
-Rust 实现的 Obsidian vault CLI + MCP server。单静态二进制（~1.6MB），零运行时依赖，支持本地知识库的全栈检索、双向链接分析、图谱遍历与笔记管理。
+Rust 实现的 Obsidian vault CLI。单静态二进制（~1.6MB），零运行时依赖，支持本地知识库的全栈检索、双向链接分析、图谱遍历与笔记管理。
 
 ## 构建
 
@@ -27,7 +27,7 @@ target/release/ob-cli-rust
 |---|---|---|
 | **ob-search** | 检索模块 | Retrieval: search(语法/模糊/段落/上下文/JSON)、backlinks、links、hybrid、graph |
 | **ob-core** | 核心操作模块 | Core operations: create、print、list、move、delete、frontmatter、tags、orphans、unresolved、hdaily |
-| **ob-cli** | 总入口 + MCP | Unified entry: 以上全部命令自动路由 + serve (MCP stdio server) |
+| **ob-cli** | 总入口 | Unified entry: 以上全部命令自动路由 |
 
 Cargo workspace，四个 crate：
 
@@ -49,7 +49,7 @@ crates/
 │       └── stats.rs    #   tags/orphans/unresolved
 ├── ob-search/          # 检索二进制
 ├── ob-core/            # 核心操作二进制
-└── ob-cli/             # 总入口 + MCP server (src/mcp.rs)
+└── ob-cli/             # 总入口
 ```
 
 构建产物：`target/release/{ob-search, ob-ops, ob-cli}`
@@ -61,7 +61,7 @@ crates/
 | **检索类** → `ob-search` | `search`（Obsidian 语法：AND/OR/`-排除`/`"短语"`/`path:`/`file:`/`tag:`/`line:`，支持 `--fuzzy` 模糊 / `--lines` 行级 / `--context=N` 上下文 / `--paragraph` 段落级 / `--json`；**默认自动附带每条命中的双向链接邻居**）、`hybrid`（关键词+双链一跳）、`graph`（多跳图遍历 `--depth=N`）、`backlinks`（反向链接）、`links`（正向链接） |
 | **文档/目录操作类** → `ob-core` | `create`（新建，自动建目录）、`move`（重命名/移动并自动更新全库链接）、`delete`（删除）、`print`（读全文）、`frontmatter`（YAML 属性 get/set/remove）、`hdaily`（无头每日笔记） |
 | **列表/统计展示类** → `ob-core` | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
-| **Agent 接入类** → `ob-cli serve` | `serve`（MCP stdio server——对 CLI 的薄封装，每个 MCP 工具直接对应一个 CLI 命令，无额外逻辑） |
+
 
 ## Workspace 参数（必传）
 
@@ -74,7 +74,7 @@ ob-cli search "关键词" --path /不存在            # ❌ exit 2: 目录不�
 ```
 
 > 也支持环境变量 `OBSIDIAN_VAULT=/data/llm_wiki`（--path 优先级更高）。
-> 适合作为外部 MCP 封装的固定参数：MCP 启动时绑定 workspace，所有调用透传该路径。
+> 适合作为外部封装（如 MCP 工具）的固定参数：绑定 workspace，所有调用透传该路径。
 
 ## 查询语法（与 Obsidian 一致）
 

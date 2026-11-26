@@ -1,5 +1,5 @@
 [package]
-description = "Unified entry point for all commands + MCP stdio server for AI agents"
+description = "Unified entry point for all commands"
 name = "ob-cli"
 version = "0.1.0"
 edition = "2021"

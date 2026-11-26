@@ -3,12 +3,12 @@ use std::path::PathBuf;
 
 pub fn help_text() -> String {
     format!(
-        "ob-cli-rust — Obsidian vault CLI + MCP server (Rust)
+        "ob-cli-rust — Obsidian vault CLI (Rust)
 
 BINARIES:
   ob-search   检索模块 | Retrieval: search/backlinks/links/hybrid/graph
   ob-core     核心操作模块 | Core operations: create/print/list/move/delete/frontmatter/tags/orphans/unresolved/hdaily
-  ob-cli      总入口 + MCP server | Unified entry + MCP server (serve)
+  ob-cli      总入口 | Unified entry
 
 USAGE:
   ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex] [--json] [--max N]
@@ -26,7 +26,6 @@ USAGE:
   ob-cli orphans               [--path <vault>]
   ob-cli unresolved            [--path <vault>]
   ob-cli hdaily [dir]          [--path <vault>]
-  ob-cli serve                 [--path <vault>]    # MCP stdio server
 
 QUERY SYNTAX (Obsidian compatible):
   word1 word2 = AND | OR = or | -word = exclude | \"phrase\" = exact

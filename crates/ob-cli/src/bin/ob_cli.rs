@@ -1,6 +1,4 @@
-// ob-cli — 总入口: 全命令路由 + MCP server
-#[path = "../mcp.rs"]
-mod mcp;
+// ob-cli — 总入口: 全命令路由
 use ob_lib::cmds;
 use ob_lib::common;
 
@@ -32,7 +30,6 @@ fn main() {
         "orphans" => cmds::stats::run_orphans(&ctx),
         "unresolved" => cmds::stats::run_unresolved(&ctx),
         "hdaily" => cmds::docs::run_hdaily(&ctx),
-        "serve" => mcp::run(&ctx.vp),
         _ => usage(),
     }
 }

@@ -91,5 +91,3 @@ pub fn run_hdaily(ctx: &Ctx) {
     let dir = ctx.pos_args.get(1).map(|s| s.as_str()).unwrap_or("05-Daily");
     crate::crud::hdaily(&vp, dir, None);
 }
-
-// ---------- MCP stdio server ----------
