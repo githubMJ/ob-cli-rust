@@ -43,9 +43,50 @@ pub fn run_search(ctx: &Ctx) {
                 .iter()
                 .find_map(|f| f.strip_prefix("--depth=").and_then(|v| v.parse().ok()))
                 .unwrap_or(1);
-            if !matches!(mode.as_str(), "exact" | "fuzzy" | "regex" | "graph" | "link") {
-                eprintln!("Error: unknown --mode '{}'. Use: exact | fuzzy | regex | graph | link", mode);
+            if !matches!(mode.as_str(), "exact" | "fuzzy" | "regex" | "graph" | "link" | "backlinks" | "links-of") {
+                eprintln!("Error: unknown --mode '{}'. Use: exact | fuzzy | regex | graph | link | backlinks | links-of", mode);
                 std::process::exit(2);
+            }
+            // backlinks/links-of 模式: query 为笔记名, 直接输出链接关系后结束
+            if mode == "backlinks" || mode == "links-of" {
+                let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
+                let docs = vault::load_docs(&vp);
+                let idx = vault::build_link_index(&docs);
+                let target = q.trim_end_matches(".md").rsplit('/').next().unwrap().to_lowercase();
+                let target_rel = idx.get(&target).cloned();
+                let mut out: Vec<String> = Vec::new();
+                if mode == "backlinks" {
+                    for d in &docs {
+                        if d.base.to_lowercase() == target { continue; }
+                        if extract_links(&d.content, &link_re).iter().any(|l| *l == target) {
+                            out.push(d.rel.clone());
+                        }
+                    }
+                    out.sort();
+                    if out.is_empty() { println!("No backlinks found for: {q}"); return; }
+                    for r in out { println!("{r}"); }
+                } else {
+                    // links-of: 正向链接 (解析为 rel 路径)
+                    let content = match &target_rel {
+                        Some(rel) => docs.iter().find(|d| d.rel == *rel).map(|d| d.content.clone()),
+                        None => docs.iter().find(|d| d.base.to_lowercase() == target).map(|d| d.content.clone()),
+                    };
+                    match content {
+                        Some(c) => {
+                            let mut seen = std::collections::HashSet::new();
+                            for l in extract_links(&c, &link_re) {
+                                if seen.insert(l.clone()) {
+                                    match idx.get(&l) {
+                                        Some(rel) => println!("{rel}"),
+                                        None => println!("{l} (unresolved)"),
+                                    }
+                                }
+                            }
+                        }
+                        None => println!("No matches: {q}"),
+                    }
+                }
+                return;
             }
             let text_mode = if mode == "graph" || mode == "link" { "exact" } else { mode.as_str() };
             let matcher = |d: &Doc| query::match_doc_mode(d, &ast, text_mode);

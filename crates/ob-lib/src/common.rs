@@ -36,8 +36,10 @@ SEARCH MODES (--mode):
   exact   substring match (default, 子串匹配)
   fuzzy   subsequence match (模糊匹配, 容忍缺字/乱序)
   regex   regular expression (正则表达式)
-  graph   keyword hits + n-hop link BFS (图检索, 配合 --depth)
-  link    keyword hits + bidirectional link neighbors (双向链检索)"
+  graph      keyword hits + n-hop link BFS (图检索, 配合 --depth)
+  link       keyword hits + bidirectional link neighbors (双向链检索)
+  backlinks  query 为笔记名, 返回引用它的笔记 (反向链接)
+  links-of   query 为笔记名, 返回它链接的笔记 (正向链接, 含未解析标记)"
     )
 }
 
