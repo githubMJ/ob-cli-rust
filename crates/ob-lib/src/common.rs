@@ -18,7 +18,7 @@ USAGE:
   ob-cli graph <note>          [--path <vault>] [--depth N]
   ob-cli list                  [--path <vault>]
   ob-cli print <note>          [--path <vault>]
-  ob-cli create <title> [--content <text>] [--path <vault>]
+  ob-cli create <title> [--content <text>] [--file <本地文件>] [--path <vault>]
   ob-cli move <from> <to>      [--path <vault>]
   ob-cli delete <note> [--force] [--path <vault>]
   ob-cli frontmatter <note> get|[set key val]|[remove key] [--path <vault>]

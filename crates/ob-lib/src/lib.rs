@@ -23,6 +23,13 @@ pub fn parse_cli() -> (String, Ctx) {
             vault_flag = args.get(i + 1).cloned();
             i += 2;
             continue;
+        } else if let Some(v) = a.strip_prefix("--file") {
+            if let Some(val) = v.strip_prefix('=') {
+                kv.push(("file".into(), val.to_string()));
+            } else {
+                kv.push(("file".into(), args.get(i + 1).cloned().unwrap_or_default()));
+                i += 1;
+            }
         } else if let Some(v) = a.strip_prefix("--content") {
             if let Some(val) = v.strip_prefix('=') {
                 kv.push(("content".into(), val.to_string()));

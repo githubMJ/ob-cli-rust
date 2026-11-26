@@ -38,12 +38,19 @@ pub fn run_create(ctx: &Ctx) {
         let kv = &ctx.kv;
         let has = |f: &str| flags.iter().any(|x| x == f);
             let title = pos_args.get(1).unwrap_or_else(|| usage());
-            let content = kv
-                .iter()
-                .find(|(k, _)| k == "content")
-                .map(|(_, v)| v.clone())
-                .unwrap_or_default()
-                .replace("\\n", "\n");
+            // 内容来源优先级: --file 本地文件 > --content 内联文本
+            let content = if let Some(f) = kv.iter().find(|(k, _)| k == "file").map(|(_, v)| v.clone()) {
+                std::fs::read_to_string(&f).unwrap_or_else(|e| {
+                    eprintln!("Error reading file {f}: {e}");
+                    std::process::exit(1);
+                })
+            } else {
+                kv.iter()
+                    .find(|(k, _)| k == "content")
+                    .map(|(_, v)| v.clone())
+                    .unwrap_or_default()
+                    .replace("\\n", "\n")
+            };
             let mut path = vp.join(title);
             path.set_extension("md");
             if let Some(parent) = path.parent() {

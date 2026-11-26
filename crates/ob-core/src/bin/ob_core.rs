@@ -7,7 +7,7 @@ fn usage() -> ! {
         "ob-core — 核心操作模块 | Core operations
 
 USAGE:
-  ob-core create <title> [--content <text>] [--path <vault>]
+  ob-core create <title> [--content <text>] [--file <file>] [--path <vault>]
   ob-core print <note>         [--path <vault>]
   ob-core list                 [--path <vault>]
   ob-core move <from> <to>     [--path <vault>]    # rename + update all links
