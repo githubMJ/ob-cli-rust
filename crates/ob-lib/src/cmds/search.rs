@@ -25,8 +25,15 @@ pub fn run_search(ctx: &Ctx) {
                 .iter()
                 .find_map(|f| f.strip_prefix("--max=").and_then(|v| v.parse().ok()))
                 .unwrap_or(20);
-            let fuzzy = has("--fuzzy");
-            let matcher = |d: &Doc| query::match_doc_mode(d, &ast, fuzzy);
+            let mode = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--mode=").map(|v| v.to_string()))
+                .unwrap_or_else(|| if has("--fuzzy") { "fuzzy".to_string() } else { "exact".to_string() });
+            if !matches!(mode.as_str(), "exact" | "fuzzy" | "regex") {
+                eprintln!("Error: unknown --mode '{}'. Use: exact | fuzzy | regex", mode);
+                std::process::exit(2);
+            }
+            let matcher = |d: &Doc| query::match_doc_mode(d, &ast, &mode);
             let expand = has("--links");
             let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
 

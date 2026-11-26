@@ -11,7 +11,7 @@ BINARIES:
   ob-cli      总入口 + MCP server | Unified entry + MCP server (serve)
 
 USAGE:
-  ob-cli search <query>        [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]
+  ob-cli search <query>        [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex] [--json] [--max N]
   ob-cli backlinks <note>      [--path <vault>] [--json]
   ob-cli links <note>          [--path <vault>]
   ob-cli hybrid <query>        [--path <vault>] [--max N]
@@ -30,7 +30,12 @@ USAGE:
 
 QUERY SYNTAX (Obsidian compatible):
   word1 word2 = AND | OR = or | -word = exclude | \"phrase\" = exact
-  path:dir file:name tag:#tag line:(a b)"
+  path:dir file:name tag:#tag line:(a b)
+
+SEARCH MODES (--mode):
+  exact   substring match (default, 子串匹配)
+  fuzzy   subsequence match (模糊匹配, 容忍缺字/乱序)
+  regex   regular expression (正则表达式)"
     )
 }
 

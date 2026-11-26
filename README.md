@@ -87,7 +87,8 @@ path:"04-Wiki/"      按路径过滤
 file:"名字"          按文件名
 tag:#标签            按标签 (含嵌套 tag:#a/b)
 line:(word1 word2)   同一行同时出现
---fuzzy              模糊子序列匹配 (容忍拼写缺漏)
+--fuzzy              等价于 --mode=fuzzy
+--mode=exact|fuzzy|regex  指定搜索模式
 ```
 
 ## 粒度控制

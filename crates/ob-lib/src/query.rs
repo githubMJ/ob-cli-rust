@@ -1,3 +1,5 @@
+use regex::Regex;
+
 // query.rs — Obsidian 兼容搜索语法: AND(空格) OR -排除 "短语" path: file: tag: line:()
 use crate::vault::Doc;
 
@@ -201,13 +203,20 @@ pub fn parse(q: &str) -> Option<Node> {
 
 // ---------- 匹配 ----------
 pub fn match_doc(doc: &Doc, node: &Node) -> bool {
-    match_doc_mode(doc, node, false)
+    match_doc_mode(doc, node, "exact")
 }
 
-pub fn match_doc_mode(doc: &Doc, node: &Node, fuzzy: bool) -> bool {
+/// mode: "exact" 子串 | "fuzzy" 子序列 | "regex" 正则
+pub fn match_doc_mode(doc: &Doc, node: &Node, mode: &str) -> bool {
+    let word_match = |w: &str| -> bool {
+        match mode {
+            "fuzzy" => fuzzy_contains(&doc.lower, w),
+            "regex" => Regex::new(w).map(|re| re.is_match(&doc.content)).unwrap_or(false),
+            _ => doc.lower.contains(&w.to_lowercase()),
+        }
+    };
     match node {
-        Node::Word(w) => if fuzzy { fuzzy_contains(&doc.lower, w) } else { doc.lower.contains(w) },
-        Node::Phrase(w) => if fuzzy { fuzzy_contains(&doc.lower, w) } else { doc.lower.contains(w) },
+        Node::Word(w) | Node::Phrase(w) => word_match(w),
         Node::And(kids) => kids.iter().all(|k| match_doc(doc, k)),
         Node::Or(kids) => kids.iter().any(|k| match_doc(doc, k)),
         Node::Not(k) => !match_doc(doc, k),
