@@ -88,8 +88,18 @@ file:"名字"          按文件名
 tag:#标签            按标签 (含嵌套 tag:#a/b)
 line:(word1 word2)   同一行同时出现
 --fuzzy              等价于 --mode=fuzzy
---mode=exact|fuzzy|regex  指定搜索模式
+--mode=exact|fuzzy|regex|graph|link  指定搜索模式
 ```
+
+## 检索模式
+
+| --mode | 说明 | 配合参数 |
+|---|---|---|
+| `exact` | 子串精确匹配（默认） | |
+| `fuzzy` | 模糊子序列匹配 | |
+| `regex` | 正则表达式 | |
+| `graph` | 关键词命中为种子的多跳图遍历（返回节点+边） | `--depth=N` |
+| `link` | 命中笔记的正向+反向链接邻居（双向链检索） | |
 
 ## 粒度控制
 

@@ -29,11 +29,16 @@ pub fn run_search(ctx: &Ctx) {
                 .iter()
                 .find_map(|f| f.strip_prefix("--mode=").map(|v| v.to_string()))
                 .unwrap_or_else(|| if has("--fuzzy") { "fuzzy".to_string() } else { "exact".to_string() });
-            if !matches!(mode.as_str(), "exact" | "fuzzy" | "regex") {
-                eprintln!("Error: unknown --mode '{}'. Use: exact | fuzzy | regex", mode);
+            let depth: usize = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--depth=").and_then(|v| v.parse().ok()))
+                .unwrap_or(1);
+            if !matches!(mode.as_str(), "exact" | "fuzzy" | "regex" | "graph" | "link") {
+                eprintln!("Error: unknown --mode '{}'. Use: exact | fuzzy | regex | graph | link", mode);
                 std::process::exit(2);
             }
-            let matcher = |d: &Doc| query::match_doc_mode(d, &ast, &mode);
+            let text_mode = if mode == "graph" || mode == "link" { "exact" } else { mode.as_str() };
+            let matcher = |d: &Doc| query::match_doc_mode(d, &ast, text_mode);
             let expand = has("--links");
             let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
 
@@ -110,6 +115,69 @@ pub fn run_search(ctx: &Ctx) {
 
             if matched.is_empty() {
                 println!("No matches: {q}");
+                return;
+            }
+            // 图模式: 关键词命中为种子, BFS 多跳扩展
+            if mode == "graph" {
+                let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
+                let idx = vault::build_link_index(&docs);
+                use std::collections::VecDeque;
+                let mut visited: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+                let mut queue = VecDeque::new();
+                for h in &matched { visited.entry(h.rel.clone()).or_insert(0); queue.push_back((h.rel.clone(), 0usize)); }
+                let mut edges: Vec<(usize, String, String, String)> = Vec::new();
+                let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+                let mut out_links: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+                let mut in_links: std::collections::HashMap<String, Vec<String>> = std::collections::HashMap::new();
+                for d in &docs {
+                    for l in extract_links(&d.content, &link_re) {
+                        if let Some(t) = idx.get(&l) {
+                            out_links.entry(d.rel.clone()).or_default().push(t.clone());
+                            in_links.entry(t.clone()).or_default().push(d.rel.clone());
+                        }
+                    }
+                }
+                while let Some((cur, d)) = queue.pop_front() {
+                    if d >= depth { continue; }
+                    let mut neighbors: Vec<(String, &str)> = Vec::new();
+                    if let Some(v) = out_links.get(&cur) { for t in v { neighbors.push((t.clone(), "→")); } }
+                    if let Some(v) = in_links.get(&cur) { for s2 in v { neighbors.push((s2.clone(), "◄")); } }
+                    for (next, arrow) in neighbors {
+                        let nd = d + 1;
+                        let key = if cur < next { format!("{cur}|{next}") } else { format!("{next}|{cur}") };
+                        let is_new = !visited.contains_key(&next);
+                        if !seen.contains(&key) {
+                            seen.insert(key);
+                            edges.push((nd, cur.clone(), arrow.to_string(), next.clone()));
+                        }
+                        if is_new { visited.insert(next.clone(), nd); queue.push_back((next, nd)); }
+                    }
+                }
+                println!("Graph search [{}] depth {}: {} nodes, {} edges", q, depth, visited.len(), edges.len());
+                edges.sort_by_key(|e| (e.0, e.1.clone()));
+                for (d, from, arrow, to) in &edges {
+                    println!("  {}{} {} {}", "  ".repeat(*d), from, arrow, to);
+                }
+                return;
+            }
+            // 双链模式: 命中笔记的正向+反向链接邻居
+            if mode == "link" {
+                let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
+                let idx = vault::build_link_index(&docs);
+                println!("Link search [{}]: {} seed notes", q, matched.len());
+                for h in &matched {
+                    println!("  ● {}", h.rel);
+                    for l in extract_links(&h.content, &link_re) {
+                        if let Some(rel) = idx.get(&l) {
+                            if rel != &h.rel { println!("    ► links to: {}", rel); }
+                        }
+                    }
+                    for d in &docs {
+                        if d.rel != h.rel && extract_links(&d.content, &link_re).iter().any(|l| *l == h.base.to_lowercase()) {
+                            println!("    ◄ linked by: {}", d.rel);
+                        }
+                    }
+                }
                 return;
             }
             for m in &matched {
