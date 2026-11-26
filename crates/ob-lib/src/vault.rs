@@ -88,10 +88,69 @@ fn parse_inline_tags(content: &str) -> Vec<String> {
 }
 
 /// 遍历 vault, 返回所有 .md 文档 (跳过隐藏目录)
+/// 优化: 按顶层子目录并行读取 (std scoped threads, 无额外依赖)
 pub fn load_docs(vault: &Path) -> Vec<Doc> {
+    // 收集顶层条目: 子目录 + 根目录文件
+    let mut subdirs: Vec<PathBuf> = Vec::new();
+    let mut root_files: Vec<PathBuf> = Vec::new();
+    if let Ok(rd) = fs::read_dir(vault) {
+        let mut entries: Vec<PathBuf> = rd.filter_map(|e| e.ok()).map(|e| e.path()).collect();
+        entries.sort();
+        for path in entries {
+            let name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+            if name.starts_with('.') {
+                continue;
+            }
+            if path.is_dir() {
+                subdirs.push(path);
+            } else if name.to_lowercase().ends_with(".md") {
+                root_files.push(path);
+            }
+        }
+    }
+    let mut handles = Vec::new();
+    // 每个顶层子目录一个并行任务
+    for dir in subdirs {
+        handles.push(std::thread::spawn(move || {
+            let mut docs = Vec::new();
+            walk_into(&dir, &mut docs);
+            docs
+        }));
+    }
+    // 根文件主线程处理
     let mut docs = Vec::new();
-    walk(vault, vault, &mut docs);
+    for path in root_files {
+        if let Some(d) = read_doc(vault, &path) {
+            docs.push(d);
+        }
+    }
+    for h in handles {
+        if let Ok(mut part) = h.join() {
+            docs.append(&mut part);
+        }
+    }
+    docs.sort_by(|a, b| a.rel.cmp(&b.rel));
     docs
+}
+
+fn walk_into(dir: &Path, docs: &mut Vec<Doc>) {
+    walk(dir, dir.parent().unwrap_or(dir), docs);
+}
+
+fn read_doc(vault: &Path, path: &Path) -> Option<Doc> {
+    let content = fs::read_to_string(path).ok()?;
+    let rel = path.strip_prefix(vault).ok()?.to_string_lossy().to_string();
+    let base = path.file_name()?.to_string_lossy().trim_end_matches(".md").to_string();
+    let mut tags = parse_frontmatter_tags(&content);
+    tags.extend(parse_inline_tags(&content));
+    Some(Doc {
+        rel,
+        base,
+        lower: content.to_lowercase(),
+        content,
+        lines: Vec::new(),
+        tags,
+    })
 }
 
 fn walk(root: &Path, dir: &Path, docs: &mut Vec<Doc>) {
@@ -108,23 +167,8 @@ fn walk(root: &Path, dir: &Path, docs: &mut Vec<Doc>) {
             }
             walk(root, &path, docs);
         } else if name.to_lowercase().ends_with(".md") {
-            if let Ok(content) = fs::read_to_string(&path) {
-                let rel = path
-                    .strip_prefix(root)
-                    .unwrap_or(&path)
-                    .to_string_lossy()
-                    .to_string();
-                let base = name.trim_end_matches(".md").to_string();
-                let mut tags = parse_frontmatter_tags(&content);
-                tags.extend(parse_inline_tags(&content));
-                docs.push(Doc {
-                    lower: content.to_lowercase(),
-                    base,
-                    rel,
-                    content,
-                    lines: Vec::new(),
-                    tags,
-                });
+            if let Some(d) = read_doc(root, &path) {
+                docs.push(d);
             }
         }
     }
