@@ -1,6 +1,5 @@
-// lib.rs — 共享库: 三个二进制 (ob-cli/ob-search/ob-ops) 的公共实现
+// lib.rs — 共享核心: 文档层/检索层/操作层/JSON
 pub mod cmds;
-pub mod mcp;
 pub mod common;
 pub mod crud;
 pub mod json;

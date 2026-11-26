@@ -1,6 +1,6 @@
-// ob-ops — 操作模块: 笔记/目录增删改 + 标签/健康统计
-use notesmd_rs::cmds;
-use notesmd_rs::common;
+// ob-ops — 操作模块
+use ob_core::cmds;
+use ob_core::common;
 
 fn usage() -> ! {
     eprintln!(
@@ -22,7 +22,7 @@ USAGE:
 }
 
 fn main() {
-    let (cmd, ctx) = notesmd_rs::parse_cli();
+    let (cmd, ctx) = ob_core::parse_cli();
     match cmd.as_str() {
         "create" => cmds::docs::run_create(&ctx),
         "print" => cmds::docs::run_print(&ctx),

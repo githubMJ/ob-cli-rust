@@ -1,0 +1,9 @@
+[package]
+name = "ob-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Shared core: vault model, Obsidian query engine, note CRUD"
+
+[dependencies]
+regex = "1"

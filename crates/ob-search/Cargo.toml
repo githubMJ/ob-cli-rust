@@ -1,0 +1,12 @@
+[package]
+name = "ob-search"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ob-search"
+path = "src/bin/ob_search.rs"
+
+[dependencies]
+ob-core = { path = "../ob-core" }
+regex = "1"

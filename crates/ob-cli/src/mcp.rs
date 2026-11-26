@@ -1,7 +1,7 @@
-use crate::common::{find_note, Ctx};
-use crate::json::{json_arr, json_escape, json_value_to_string, parse_json, Json};
-use crate::query;
-use crate::vault::{self, extract_links};
+use ob_core::common::find_note;
+use ob_core::json::{json_arr, json_escape, json_value_to_string, parse_json, Json};
+use ob_core::query;
+use ob_core::vault::{self, extract_links};
 use regex::Regex;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;

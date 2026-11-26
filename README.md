@@ -29,27 +29,30 @@ target/release/ob-cli-rust
 | **ob-ops** | 操作模块 | create、print、list、move、delete、frontmatter、tags、orphans、unresolved、hdaily |
 | **ob-cli** | 总入口 + MCP | 以上全部命令自动路由 + serve (MCP stdio server) |
 
+Cargo workspace，四个 crate：
+
 ```
-src/
-├── lib.rs           # 共享库入口 + CLI 参数解析 (三二进制共用)
-├── common.rs        # 【共享】Ctx 上下文、usage、笔记查找、行工具
-├── vault.rs         # 【文档层】vault 遍历、文档模型、frontmatter/行内标签解析、链接索引
-├── query.rs         # 【检索层】Obsidian 兼容查询语法解析器 + 匹配引擎 + 模糊匹配
-├── crud.rs          # 【操作层实现】move/delete/frontmatter/tags/orphans/unresolved/hdaily
-├── json.rs          # 【JSON】零依赖 JSON 解析/序列化
-├── mcp.rs           # 【MCP】stdio server (search_notes/read_note/backlinks/list_notes)
-├── cmds/            # 【命令实现】被三个二进制共享
-│   ├── search.rs    #   search (语法/模糊/段落/上下文/JSON)
-│   ├── graph.rs     #   graph 多跳图遍历
-│   ├── hybrid.rs    #   hybrid 混合检索
-│   ├── links.rs     #   backlinks / links 双向链接
-│   ├── docs.rs      #   create/print/list/move/delete/frontmatter/hdaily
-│   └── stats.rs     #   tags/orphans/unresolved
-└── bin/
-    ├── ob_search.rs # ob-search 二进制入口
-    ├── ob_ops.rs    # ob-ops 二进制入口
-    └── ob_cli.rs    # ob-cli 二进制入口 (路由 + serve)
+crates/
+├── ob-core/            # 共享核心 crate
+│   ├── src/lib.rs      # + CLI 参数解析 (三二进制共用)
+│   ├── src/common.rs   # 【共享】Ctx 上下文、usage、笔记查找、行工具
+│   ├── src/vault.rs    # 【文档层】vault 遍历、文档模型、frontmatter/行内标签解析、链接索引
+│   ├── src/query.rs    # 【检索层】Obsidian 兼容查询语法解析器 + 匹配引擎 + 模糊匹配
+│   ├── src/crud.rs     # 【操作层实现】move/delete/frontmatter/tags/orphans/unresolved/hdaily
+│   ├── src/json.rs     # 【JSON】零依赖 JSON 解析/序列化
+│   └── src/cmds/       # 【命令实现】被三个二进制共享
+│       ├── search.rs   #   search (语法/模糊/段落/上下文/JSON)
+│       ├── graph.rs    #   graph 多跳图遍历
+│       ├── hybrid.rs   #   hybrid 混合检索
+│       ├── links.rs    #   backlinks / links 双向链接
+│       ├── docs.rs     #   create/print/list/move/delete/frontmatter/hdaily
+│       └── stats.rs    #   tags/orphans/unresolved
+├── ob-search/          # 检索二进制
+├── ob-ops/             # 操作二进制
+└── ob-cli/             # 总入口 + MCP server (src/mcp.rs)
 ```
+
+构建产物：`target/release/{ob-search, ob-ops, ob-cli}`
 
 ### 按功能分类
 

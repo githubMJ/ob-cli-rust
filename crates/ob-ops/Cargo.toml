@@ -1,0 +1,11 @@
+[package]
+name = "ob-ops"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ob-ops"
+path = "src/bin/ob_ops.rs"
+
+[dependencies]
+ob-core = { path = "../ob-core" }

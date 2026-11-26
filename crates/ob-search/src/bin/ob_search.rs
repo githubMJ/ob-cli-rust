@@ -1,6 +1,6 @@
-// ob-search — 检索模块: 语法检索/模糊/双链/图/混合
-use notesmd_rs::cmds;
-use notesmd_rs::common;
+// ob-search — 检索模块
+use ob_core::cmds;
+use ob_core::common;
 
 fn usage() -> ! {
     eprintln!(
@@ -17,7 +17,7 @@ USAGE:
 }
 
 fn main() {
-    let (cmd, ctx) = notesmd_rs::parse_cli();
+    let (cmd, ctx) = ob_core::parse_cli();
     match cmd.as_str() {
         "search" => cmds::search::run_search(&ctx),
         "backlinks" => cmds::links::run_backlinks(&ctx),
