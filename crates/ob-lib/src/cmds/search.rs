@@ -39,7 +39,7 @@ pub fn run_search(ctx: &Ctx) {
             }
             let text_mode = if mode == "graph" || mode == "link" { "exact" } else { mode.as_str() };
             let matcher = |d: &Doc| query::match_doc_mode(d, &ast, text_mode);
-            let expand = has("--links");
+            let expand = true; // 双链信息默认始终返回 (link-aware search)
             let link_re = Regex::new(r"\[\[([^\]|#]+)").unwrap();
 
             let mut matched: Vec<&Doc> = Vec::new();
