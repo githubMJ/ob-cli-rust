@@ -1,10 +1,10 @@
-// ob-core — 核心操作模块 | Core operations module | Operations module
+// ob-core — 核心操作模块 | Core operations
 use ob_lib::cmds;
 use ob_lib::common;
 
 fn usage() -> ! {
     eprintln!(
-        "ob-core — 核心操作模块 | Core operations module | Operations module
+        "ob-core — 核心操作模块 | Core operations
 
 USAGE:
   ob-core create <title> [--content <text>] [--path <vault>]
