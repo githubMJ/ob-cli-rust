@@ -1,37 +1,48 @@
 // common.rs — 共享工具: 上下文/路径解析/笔记查找
 use std::path::PathBuf;
 
-pub fn usage() -> ! {
-    eprintln!(
-        "ob-cli-rust — Obsidian vault CLI + MCP server (three binaries)
+pub fn help_text() -> String {
+    format!(
+        "ob-cli-rust — Obsidian vault CLI + MCP server (Rust)
 
 BINARIES:
   ob-search   检索模块 | Retrieval: search/backlinks/links/hybrid/graph
-  ob-ops      操作模块 | Operations: create/print/list/move/delete/frontmatter/tags/orphans/unresolved/hdaily
+  ob-core     核心操作模块 | Core operations: create/print/list/move/delete/frontmatter/tags/orphans/unresolved/hdaily
   ob-cli      总入口 + MCP server | Unified entry + MCP server (serve)
 
 USAGE:
-  ob-cli-rust search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]
-  ob-cli-rust backlinks <note> [--path <vault>] [--json]
-  ob-cli-rust links <note>     [--path <vault>]
-  ob-cli-rust hybrid <query>   [--path <vault>] [--max N]
-  ob-cli-rust graph <note>     [--path <vault>] [--depth N]   # n-hop link graph BFS
-  ob-cli-rust list             [--path <vault>]
-  ob-cli-rust print <note>     [--path <vault>]
-  ob-cli-rust create <title> [--content <text>] [--path <vault>]
-  ob-cli-rust move <from> <to> [--path <vault>]    # rename + update all links
-  ob-cli-rust delete <note> [--force] [--path <vault>]
-  ob-cli-rust frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
-  ob-cli-rust tags [tag]       [--path <vault>]    # tag list or notes-by-tag
-  ob-cli-rust orphans          [--path <vault>]
-  ob-cli-rust unresolved       [--path <vault>]
-  ob-cli-rust hdaily [dir]     [--path <vault>]    # headless daily note
-  ob-cli-rust serve            [--path <vault>]    # MCP stdio server
+  ob-cli search <query>        [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]
+  ob-cli backlinks <note>      [--path <vault>] [--json]
+  ob-cli links <note>          [--path <vault>]
+  ob-cli hybrid <query>        [--path <vault>] [--max N]
+  ob-cli graph <note>          [--path <vault>] [--depth N]
+  ob-cli list                  [--path <vault>]
+  ob-cli print <note>          [--path <vault>]
+  ob-cli create <title> [--content <text>] [--path <vault>]
+  ob-cli move <from> <to>      [--path <vault>]
+  ob-cli delete <note> [--force] [--path <vault>]
+  ob-cli frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
+  ob-cli tags [tag]            [--path <vault>]
+  ob-cli orphans               [--path <vault>]
+  ob-cli unresolved            [--path <vault>]
+  ob-cli hdaily [dir]          [--path <vault>]
+  ob-cli serve                 [--path <vault>]    # MCP stdio server
 
 QUERY SYNTAX (Obsidian compatible):
   word1 word2 = AND | OR = or | -word = exclude | \"phrase\" = exact
   path:dir file:name tag:#tag line:(a b)"
-    );
+    )
+}
+
+/// 打印帮助后退出 (0)
+pub fn help() -> ! {
+    println!("{}", help_text());
+    std::process::exit(0)
+}
+
+/// 用法错误退出 (1)
+pub fn usage() -> ! {
+    eprintln!("{}", help_text());
     std::process::exit(1)
 }
 

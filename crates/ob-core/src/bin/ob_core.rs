@@ -7,16 +7,16 @@ fn usage() -> ! {
         "ob-core — 核心操作模块 | Core operations module | Operations module
 
 USAGE:
-  ob-ops create <title> [--content <text>] [--path <vault>]
-  ob-ops print <note>         [--path <vault>]
-  ob-ops list                 [--path <vault>]
-  ob-ops move <from> <to>     [--path <vault>]    # rename + update all links
-  ob-ops delete <note> [--force] [--path <vault>]
-  ob-ops frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
-  ob-ops tags [tag]           [--path <vault>]
-  ob-ops orphans              [--path <vault>]
-  ob-ops unresolved           [--path <vault>]
-  ob-ops hdaily [dir]         [--path <vault>]"
+  ob-core create <title> [--content <text>] [--path <vault>]
+  ob-core print <note>         [--path <vault>]
+  ob-core list                 [--path <vault>]
+  ob-core move <from> <to>     [--path <vault>]    # rename + update all links
+  ob-core delete <note> [--force] [--path <vault>]
+  ob-core frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
+  ob-core tags [tag]           [--path <vault>]
+  ob-core orphans              [--path <vault>]
+  ob-core unresolved           [--path <vault>]
+  ob-core hdaily [dir]         [--path <vault>]"
     );
     std::process::exit(1)
 }
