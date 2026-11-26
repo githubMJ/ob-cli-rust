@@ -100,6 +100,10 @@ fn main() {
                 kv.push(("content".into(), args.get(i + 1).cloned().unwrap_or_default()));
                 i += 1;
             }
+        } else if a == "--max" || a == "--context" || a == "--depth" {
+            let val = args.get(i + 1).cloned().unwrap_or_default();
+            flags.push(format!("{}={}", a, val));
+            i += 1;
         } else if a.starts_with("--") {
             flags.push(a.to_string());
         } else {
@@ -108,7 +112,7 @@ fn main() {
         i += 1;
     }
     let has = |f: &str| flags.iter().any(|x| x == f);
-    let get_num = |f: &str, default: usize| -> usize {
+    let _get_num = |f: &str, default: usize| -> usize {
         flags
             .iter()
             .find_map(|x| x.strip_prefix(f).and_then(|v| v.parse().ok()))
@@ -124,7 +128,6 @@ fn main() {
                 .iter()
                 .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
                 .unwrap_or(0);
-            eprintln!("DBG flags={:?} para={} ctx={}", flags, para, ctx);
             let q = pos_args.get(1).unwrap_or_else(|| usage());
             let ast = query::parse(q).unwrap_or_else(|| usage());
             let docs = vault::load_docs(&vp);
