@@ -3,47 +3,74 @@ use std::path::PathBuf;
 
 pub fn help_text() -> String {
     format!(
-        "ob-cli-rust — Obsidian vault CLI (Rust)
+        "ob-cli-rust — Obsidian vault CLI (Rust) | 知识库检索与管理
+
+WORKSPACE:
+  所有命令必须通过 --path 指定 vault 目录 (或环境变量 OBSIDIAN_VAULT), 检索与操作严格限制在该目录内。
+  All commands require --path <vault-dir> (or env OBSIDIAN_VAULT). Access is confined to that directory.
 
 BINARIES:
   ob-search   检索模块 | Retrieval: search/backlinks/links/hybrid/graph
-  ob-core     核心操作模块 | Core operations: create/print/list/move/delete/frontmatter/tags/orphans/unresolved/hdaily
-  ob-cli      总入口 | Unified entry
+  ob-core     核心操作模块 | Core operations: create/print/list/move/delete/frontmatter/tags/...
+  ob-cli      总入口 | Unified entry: all commands above + automatic routing
 
-USAGE:
-  ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex|graph|link] [--max-chars N] [--max-lines N] [--json] [--limit N]
-  ob-cli backlinks <note>      [--path <vault>] [--json]
-  ob-cli links <note>          [--path <vault>]
-  ob-cli hybrid <query>        [--path <vault>] [--max N]
-  ob-cli graph <note>          [--path <vault>] [--depth N]
-  ob-cli list                  [--path <vault>]
-  ob-cli print <note>          [--path <vault>]
-  ob-cli create <title> [--content <text>] [--file <本地文件>] [--path <vault>]
-  ob-cli move <from> <to>      [--path <vault>]
-  ob-cli delete <note> [--force] [--path <vault>]
-  ob-cli frontmatter <note> get|[set key val]|[remove key] [--path <vault>]
-  ob-cli tags [tag]            [--path <vault>]
-  ob-cli orphans               [--path <vault>]
-  ob-cli unresolved            [--path <vault>]
-  ob-cli hdaily [dir]          [--path <vault>]
+COMMANDS:
+  search <query>        全文检索 (默认附带每条命中的双向链接邻居)
+                        Full-text search; every hit includes its bidirectional link neighbors.
+  backlinks <note>      反向链接 | Notes that reference the given note.
+  links <note>          正向链接 | Wiki links inside the given note.
+  hybrid <query>        混合检索 | Keyword hits + 1-hop link expansion.
+  graph <note>          图检索 | n-hop bidirectional BFS from a note (--depth N).
+  list                  列出全部笔记 | List all notes (relative paths).
+  print <note>          打印全文 | Print full note content (byte-identical).
+  create <title>        创建/覆盖笔记 | Create or overwrite; --content text; --file src to import a local file.
+  append <note>         追加内容 | Append --content text to note end.
+  move <from> <to>      移动/重命名 | Move or rename; updates all wiki links vault-wide.
+  delete <note>         删除 | Delete (--force skips confirmation).
+  frontmatter <note>    YAML 属性 | get / set key val / remove key.
+  tags [tag]            标签 | Tag counts, or notes having a tag (frontmatter + inline #tag).
+  dirs                  目录结构 | List directory tree.
+  orphans               孤立笔记 | Notes with no inbound links.
+  unresolved            断链 | Wiki links pointing to non-existent notes.
+  hdaily [dir]          每日笔记 | Create/show today's daily note (default dir: 05-Daily).
+  help                  完整手册 | Show this manual.
 
-QUERY SYNTAX (Obsidian compatible):
-  word1 word2 = AND | OR = or | -word = exclude | \"phrase\" = exact
-  path:dir file:name tag:#tag line:(a b)
+QUERY SYNTAX (search, 与 Obsidian 兼容):
+  word1 word2           同文件 AND | both terms in same file
+  word1 OR word2        或 | either term
+  -word                 排除 | exclude files containing term
+  \"exact phrase\"       短语 | exact phrase
+  path:dir/             按路径过滤 | filter by path
+  file:name             按文件名过滤 | filter by file name
+  tag:#tag              按标签 (含嵌套 #a/b) | filter by tag
+  line:(w1 w2)          同行同时出现 | both terms on the same line
 
-SEARCH MODES (--mode):
-  (默认行为: 每条命中自动附带 links_to / linked_by 双向链接邻居)
-  exact   substring match (default, 子串匹配)
-  fuzzy   subsequence match (模糊匹配, 容忍缺字/乱序)
-  regex   regular expression (正则表达式)
-  (--limit = 命中笔记条数上限 | --max-lines = 每篇笔记的命中行数上限 | --max-chars = 每个内容块字符上限)
-  graph      keyword hits + n-hop link BFS (图检索, 配合 --depth)
-  link       keyword hits + bidirectional link neighbors (双向链检索)
-  backlinks  query 为笔记名, 返回引用它的笔记 (反向链接)
-  links-of   query 为笔记名, 返回它链接的笔记 (正向链接, 含未解析标记)"
+SEARCH OPTIONS:
+  --limit N             返回笔记条数上限 | max notes returned (default 20)
+  --mode M              搜索模式 | exact(子串,默认) | fuzzy(模糊子序列) | regex(正则)
+                                | graph(关键词种子+多跳图遍历) | link(命中笔记的双向邻居)
+                                | backlinks(反向链接, query=笔记名) | links-of(正向链接, query=笔记名)
+  --lines               显示命中行 | show matching lines
+  --context N           命中行前后 N 行 | context lines around each match (requires --lines)
+  --paragraph           显示命中段落 | show full paragraphs containing matches
+  --max-lines N         每篇命中行数上限 | max matching lines per note (0 = unlimited)
+  --max-chars N         内容块字符上限 | char cap per snippet/match/paragraph (appends ...[truncated])
+  --json                JSON 输出 | structured output: {{query, count, results:[{{file,title,snippet,links_to,linked_by,matches,paragraphs}}]}}
+
+GLOBAL OPTIONS:
+  --path <dir>          workspace 目录 (必传) | vault directory (required)
+  --help / -h           帮助 | show this help
+  --version / -V        版本 | show version
+
+EXAMPLES:
+  ob-cli search \"归并排序\" --path /data/llm_wiki --paragraph
+  ob-cli search \"RTA tag:#广告 -00-Inbox\" --path /data/llm_wiki --json --limit 5
+  ob-cli search \"file:算法目录\" --path /data/llm_wiki --mode=link
+  ob-cli search \"归并排序\" --path /data/llm_wiki --mode=graph --depth=2
+  ob-cli print \"1.4 - 归并排序\" --path /data/llm_wiki
+  ob-cli move \"旧标题\" \"新目录/新标题\" --path /data/llm_wiki"
     )
 }
-
 /// 打印帮助后退出 (0)
 pub fn help() -> ! {
     println!("{}", help_text());
