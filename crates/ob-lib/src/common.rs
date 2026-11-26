@@ -47,9 +47,7 @@ pub fn usage() -> ! {
 }
 
 pub fn vault_path(flag: Option<String>) -> PathBuf {
-    let p = flag
-        .or_else(|| std::env::var("OBSIDIAN_VAULT").ok())
-        .unwrap_or_else(|| "/data/llm_wiki".to_string());
+    let p = flag.unwrap_or_else(|| "/data/llm_wiki".to_string());
     PathBuf::from(p)
 }
 

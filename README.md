@@ -63,6 +63,19 @@ crates/
 | **列表/统计展示类** → `ob-core` | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
 | **Agent 接入类** → `ob-cli serve` | `serve`（MCP stdio server：search_notes / read_note / backlinks / list_notes） |
 
+## Workspace 参数（必传）
+
+所有命令必须通过 `--path <目录>` 指定 vault 工作空间，检索/操作严格限制在该目录内：
+
+```bash
+ob-cli search "关键词" --path /data/llm_wiki     # ✅
+ob-cli search "关键词"                            # ❌ exit 2: 缺少 --path
+ob-cli search "关键词" --path /不存在            # ❌ exit 2: 目录不存在
+```
+
+> 也支持环境变量 `OBSIDIAN_VAULT=/data/llm_wiki`（--path 优先级更高）。
+> 适合作为外部 MCP 封装的固定参数：MCP 启动时绑定 workspace，所有调用透传该路径。
+
 ## 查询语法（与 Obsidian 一致）
 
 ```

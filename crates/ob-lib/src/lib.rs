@@ -7,6 +7,7 @@ pub mod query;
 pub mod vault;
 
 use common::Ctx;
+use std::path::PathBuf;
 
 /// CLI 参数解析 (三个二进制共用)
 pub fn parse_cli() -> (String, Ctx) {
@@ -41,6 +42,19 @@ pub fn parse_cli() -> (String, Ctx) {
         i += 1;
     }
     let cmd = pos_args.first().cloned().unwrap_or_default();
-    let vp = common::vault_path(vault_flag);
+    // workspace 必传: 所有检索/操作都限制在指定目录内
+    let vp = match vault_flag.or_else(|| std::env::var("OBSIDIAN_VAULT").ok()) {
+        Some(p) => PathBuf::from(p),
+        None => {
+            eprintln!("Error: --path <vault> is required (workspace directory to operate on)");
+            eprintln!("错误: 必须通过 --path 指定 vault 工作空间目录");
+            std::process::exit(2);
+        }
+    };
+    if !vp.is_dir() {
+        eprintln!("Error: vault path does not exist or is not a directory: {}", vp.display());
+        eprintln!("错误: vault 路径不存在或不是目录: {}", vp.display());
+        std::process::exit(2);
+    }
     (cmd, Ctx { vp, flags, pos_args, kv })
 }
