@@ -19,6 +19,11 @@ pub fn run_search(ctx: &Ctx) {
                 .iter()
                 .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
                 .unwrap_or(0);
+            // 每条内容块(snippet/matches/paragraphs)的字符上限, 0=不限制
+            let max_chars: usize = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--max-chars=").and_then(|v| v.parse().ok()))
+                .unwrap_or(0);
             let ctx: usize = flags
                 .iter()
                 .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
@@ -94,7 +99,10 @@ pub fn run_search(ctx: &Ctx) {
                         match hit {
                             Some(l) => {
                                 let t = l.trim();
-                                if t.len() > 120 { format!("{}...", &t[..t.floor_char_boundary(120)]) } else { t.to_string() }
+                                if max_chars > 0 {
+                                    let c = t.chars().count();
+                                    if c > max_chars { format!("{}...[truncated]", t.chars().take(max_chars).collect::<String>()) } else { t.to_string() }
+                                } else if t.len() > 120 { format!("{}...", &t[..t.floor_char_boundary(120)]) } else { t.to_string() }
                             }
                             None => m.content.lines()
                                 .filter(|l| !l.trim().is_empty())
@@ -127,8 +135,14 @@ pub fn run_search(ctx: &Ctx) {
                             json_arr(&back)
                         );
                     }
-                    let paras = if para {
-                        find_paragraphs(m, &q.to_lowercase())
+                    let trunc = |s: String| -> String {
+                        if max_chars > 0 && s.chars().count() > max_chars {
+                            let t: String = s.chars().take(max_chars).collect();
+                            format!("{}...[truncated]", t)
+                        } else { s }
+                    };
+                    let paras: Vec<String> = if para {
+                        find_paragraphs(m, &q.to_lowercase()).into_iter().map(trunc).collect()
                     } else { Vec::new() };
                     obj += &format!(",\"paragraphs\":{}", json_arr(&paras));
                     let mut matches: Vec<String> = Vec::new();
@@ -145,7 +159,7 @@ pub fn run_search(ctx: &Ctx) {
                                     block.push_str(&format!("{}{}: {}", mark, s2 + j + 1, l.trim()));
                                     if s2 + j + 1 < e2 { block.push_str("\\n"); }
                                 }
-                                matches.push(block);
+                                matches.push(trunc(block));
                             }
                         }
                     }

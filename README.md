@@ -110,6 +110,7 @@ ob-cli search "归并排序" --path <vault>   # 文件级
   --paragraph            # + 命中所在完整段落
   --links                # + 双向链接扩展
   --json                 # 结构化输出 (agent/脚本)
+  --max-chars=N          # 限制每条内容块(snippet/matches/paragraphs)字符数
 ```
 
 ## 示例

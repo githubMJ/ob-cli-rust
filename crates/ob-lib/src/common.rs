@@ -11,7 +11,7 @@ BINARIES:
   ob-cli      总入口 | Unified entry
 
 USAGE:
-  ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex] [--json] [--max N]
+  ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex|graph|link] [--max-chars N] [--json] [--max N]
   ob-cli backlinks <note>      [--path <vault>] [--json]
   ob-cli links <note>          [--path <vault>]
   ob-cli hybrid <query>        [--path <vault>] [--max N]
