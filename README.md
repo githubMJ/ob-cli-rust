@@ -59,8 +59,8 @@ crates/
 | 分类 | 命令 |
 |---|---|
 | **检索类** → `ob-search` | `search`（Obsidian 语法：AND/OR/`-排除`/`"短语"`/`path:`/`file:`/`tag:`/`line:`，支持 `--fuzzy` 模糊 / `--lines` 行级 / `--context=N` 上下文 / `--paragraph` 段落级 / `--links` 双链扩展 / `--json`）、`hybrid`（关键词+双链一跳）、`graph`（多跳图遍历 `--depth=N`）、`backlinks`（反向链接）、`links`（正向链接） |
-| **文档/目录操作类** → `ob-ops` | `create`（新建，自动建目录）、`move`（重命名/移动并自动更新全库链接）、`delete`（删除）、`print`（读全文）、`frontmatter`（YAML 属性 get/set/remove）、`hdaily`（无头每日笔记） |
-| **列表/统计展示类** → `ob-ops` | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
+| **文档/目录操作类** → `ob-core` | `create`（新建，自动建目录）、`move`（重命名/移动并自动更新全库链接）、`delete`（删除）、`print`（读全文）、`frontmatter`（YAML 属性 get/set/remove）、`hdaily`（无头每日笔记） |
+| **列表/统计展示类** → `ob-core` | `list`（列笔记）、`tags`（标签计数 / 按标签列笔记）、`orphans`（孤立笔记）、`unresolved`（断链） |
 | **Agent 接入类** → `ob-cli serve` | `serve`（MCP stdio server：search_notes / read_note / backlinks / list_notes） |
 
 ## 查询语法（与 Obsidian 一致）

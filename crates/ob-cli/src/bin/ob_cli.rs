@@ -9,7 +9,7 @@ fn usage() -> ! {
         "ob-cli — Obsidian vault 总入口 | Unified entry + MCP server
 
 USAGE:
-  ob-cli <command> ...          # 覆盖 ob-search / ob-ops 全部命令, 自动路由
+  ob-cli <command> ...          # 覆盖 ob-search / ob-core 全部命令, 自动路由
   ob-cli serve                  [--path <vault>]    # MCP stdio server
 
 MODULES:
