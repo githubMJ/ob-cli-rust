@@ -14,7 +14,7 @@ fn usage() -> ! {
         "notesmd-rs — Obsidian vault CLI + MCP server (Rust)
 
 USAGE:
-  notesmd-rs search <query>   [--path <vault>] [--links] [--lines] [--json] [--max N]
+  notesmd-rs search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--json] [--max N]
   notesmd-rs backlinks <note> [--path <vault>] [--json]
   notesmd-rs links <note>     [--path <vault>]
   notesmd-rs hybrid <query>   [--path <vault>] [--max N]
@@ -91,6 +91,7 @@ fn main() {
         if a == "--path" {
             vault_flag = args.get(i + 1).cloned();
             i += 2;
+            continue;
         } else if let Some(v) = a.strip_prefix("--content") {
             if let Some(val) = v.strip_prefix('=') {
                 kv.push(("content".into(), val.to_string()));
@@ -117,6 +118,12 @@ fn main() {
 
     match cmd {
         "search" => {
+            let para = has("--paragraph");
+            let ctx: usize = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
+                .unwrap_or(0);
+            eprintln!("DBG flags={:?} para={} ctx={}", flags, para, ctx);
             let q = pos_args.get(1).unwrap_or_else(|| usage());
             let ast = query::parse(q).unwrap_or_else(|| usage());
             let docs = vault::load_docs(&vp);
@@ -136,6 +143,27 @@ fn main() {
                 }
             }
 
+            // 提取命中所在的段落 (以空行分块)
+            fn find_paragraphs(d: &Doc, q_lower: &str) -> Vec<String> {
+                let mut paras: Vec<Vec<&str>> = Vec::new();
+                let mut cur: Vec<&str> = Vec::new();
+                for line in d.content.split('\n') {
+                    if line.trim().is_empty() {
+                        if !cur.is_empty() { paras.push(std::mem::take(&mut cur)); }
+                    } else { cur.push(line); }
+                }
+                if !cur.is_empty() { paras.push(cur); }
+                let mut out = Vec::new();
+                // 段落级 AND 语义: 所有词都出现在该段落中
+                let words: Vec<&str> = q_lower.split_whitespace().collect();
+                for p in paras {
+                    let ptext = p.join("\n").to_lowercase();
+                    if words.iter().all(|w| ptext.contains(w)) {
+                        out.push(p.join("\n"));
+                    }
+                }
+                out
+            }
             if has("--json") {
                 let mut items = Vec::new();
                 for m in &matched {
@@ -161,6 +189,10 @@ fn main() {
                             json_arr(&back)
                         );
                     }
+                    if para {
+                        let paras = find_paragraphs(m, &q.to_lowercase());
+                        obj += &format!(",\"paragraphs\":{}", json_arr(&paras));
+                    }
                     obj += "}";
                     items.push(obj);
                 }
@@ -179,6 +211,25 @@ fn main() {
             }
             for m in &matched {
                 println!("{}", m.rel);
+                if para {
+                    for p in find_paragraphs(m, &q.to_lowercase()) {
+                        for l in p.split('\n') { println!("    │ {l}"); }
+                        println!("    │");
+                    }
+                } else if ctx > 0 {
+                    let dl: Vec<&str> = d_lines(m);
+                    for (i, line) in dl.iter().enumerate() {
+                        if line.to_lowercase().contains(&q.to_lowercase()) {
+                            let s2 = i.saturating_sub(ctx);
+                            let e2 = (i + ctx + 1).min(dl.len());
+                            for (j, l) in dl[s2..e2].iter().enumerate() {
+                                let mark = if s2 + j == i { ">" } else { " " };
+                                println!("  {mark} {}: {}", s2 + j + 1, l.trim());
+                            }
+                            println!("  ---");
+                        }
+                    }
+                }
                 if expand {
                     for l in extract_links(&m.content, &link_re) {
                         if let Some(d) = by_base.get(&l) {
@@ -656,6 +707,10 @@ fn json_escape(s: &str) -> String {
         }
     }
     out
+}
+
+fn d_lines(d: &Doc) -> Vec<&str> {
+    d.content.split('\n').collect()
 }
 
 fn json_arr(items: &[String]) -> String {
