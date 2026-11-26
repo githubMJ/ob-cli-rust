@@ -81,7 +81,31 @@ pub fn run_search(ctx: &Ctx) {
                 let mut items = Vec::new();
                 for m in &matched {
                     // schema 固定: 所有字段始终存在, 未请求的粒度为空数组
-                    let mut obj = format!("{{\"file\":\"{}\"", json_escape(&m.rel));
+                    // title: 首个 # 标题; snippet: 命中行或首行摘要 (默认带内容概要, 便于不读全文即判断)
+                    let title = m.content.lines()
+                        .find(|l| l.starts_with("# "))
+                        .map(|l| l.trim_start_matches("# ").trim().to_string())
+                        .unwrap_or_else(|| m.base.clone());
+                    let snippet: String = {
+                        let q_lower = q.to_lowercase();
+                        let hit = m.content.lines()
+                            .filter(|l| !l.trim().is_empty() && !l.starts_with('#'))
+                            .find(|l| l.to_lowercase().contains(&q_lower));
+                        match hit {
+                            Some(l) => {
+                                let t = l.trim();
+                                if t.len() > 120 { format!("{}...", &t[..t.floor_char_boundary(120)]) } else { t.to_string() }
+                            }
+                            None => m.content.lines()
+                                .filter(|l| !l.trim().is_empty())
+                                .take(1)
+                                .collect::<String>()
+                                .chars()
+                                .take(120)
+                                .collect(),
+                        }
+                    };
+                    let mut obj = format!("{{\"file\":\"{}\",\"title\":\"{}\",\"snippet\":\"{}\"", json_escape(&m.rel), json_escape(&title), json_escape(&snippet));
                     if expand {
                         let fwd: Vec<String> = extract_links(&m.content, &link_re)
                             .into_iter()
