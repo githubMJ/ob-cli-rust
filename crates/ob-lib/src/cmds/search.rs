@@ -14,6 +14,11 @@ pub fn run_search(ctx: &Ctx) {
         let kv = &ctx.kv;
         let has = |f: &str| flags.iter().any(|x| x == f);
             let para = has("--paragraph");
+            let lines = has("--lines");
+            let ctxn: usize = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
+                .unwrap_or(0);
             let ctx: usize = flags
                 .iter()
                 .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
@@ -75,6 +80,7 @@ pub fn run_search(ctx: &Ctx) {
             if has("--json") {
                 let mut items = Vec::new();
                 for m in &matched {
+                    // schema 固定: 所有字段始终存在, 未请求的粒度为空数组
                     let mut obj = format!("{{\"file\":\"{}\"", json_escape(&m.rel));
                     if expand {
                         let fwd: Vec<String> = extract_links(&m.content, &link_re)
@@ -97,10 +103,29 @@ pub fn run_search(ctx: &Ctx) {
                             json_arr(&back)
                         );
                     }
-                    if para {
-                        let paras = find_paragraphs(m, &q.to_lowercase());
-                        obj += &format!(",\"paragraphs\":{}", json_arr(&paras));
+                    let paras = if para {
+                        find_paragraphs(m, &q.to_lowercase())
+                    } else { Vec::new() };
+                    obj += &format!(",\"paragraphs\":{}", json_arr(&paras));
+                    let mut matches: Vec<String> = Vec::new();
+                    if lines || ctxn > 0 {
+                        let dl: Vec<&str> = m.content.split('\n').collect();
+                        let ctx = if ctxn > 0 { ctxn } else { 0 };
+                        for (i, line) in dl.iter().enumerate() {
+                            if line.to_lowercase().contains(&q.to_lowercase()) {
+                                let s2 = i.saturating_sub(ctx);
+                                let e2 = (i + ctx + 1).min(dl.len());
+                                let mut block = String::new();
+                                for (j, l) in dl[s2..e2].iter().enumerate() {
+                                    let mark = if s2 + j == i && ctx > 0 { "> " } else { "  " };
+                                    block.push_str(&format!("{}{}: {}", mark, s2 + j + 1, l.trim()));
+                                    if s2 + j + 1 < e2 { block.push_str("\\n"); }
+                                }
+                                matches.push(block);
+                            }
+                        }
                     }
+                    obj += &format!(",\"matches\":{}", json_arr(&matches));
                     obj += "}";
                     items.push(obj);
                 }
