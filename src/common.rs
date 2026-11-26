@@ -3,7 +3,12 @@ use std::path::PathBuf;
 
 pub fn usage() -> ! {
     eprintln!(
-        "ob-cli-rust — Obsidian vault CLI + MCP server
+        "ob-cli-rust — Obsidian vault CLI + MCP server (three binaries)
+
+BINARIES:
+  ob-search   检索: search/backlinks/links/hybrid/graph
+  ob-ops      操作: create/print/list/move/delete/frontmatter/tags/orphans/unresolved/hdaily
+  ob-cli      总入口 + MCP server (serve)
 
 USAGE:
   ob-cli-rust search <query>   [--path <vault>] [--links] [--lines] [--paragraph] [--context N] [--fuzzy] [--json] [--max N]

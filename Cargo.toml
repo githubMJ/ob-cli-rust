@@ -5,6 +5,10 @@ edition = "2021"
 license = "MIT"
 description = "High-performance CLI + MCP server for Obsidian vaults"
 
+[lib]
+name = "notesmd_rs"
+path = "src/lib.rs"
+
 [dependencies]
 regex = "1"
 
@@ -12,3 +16,15 @@ regex = "1"
 opt-level = 3
 lto = true
 strip = true
+
+[[bin]]
+name = "ob-search"
+path = "src/bin/ob_search.rs"
+
+[[bin]]
+name = "ob-ops"
+path = "src/bin/ob_ops.rs"
+
+[[bin]]
+name = "ob-cli"
+path = "src/bin/ob_cli.rs"
