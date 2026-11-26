@@ -36,9 +36,11 @@ pub fn run_search(ctx: &Ctx) {
             let q = pos_args.get(1).unwrap_or_else(|| usage());
             let ast = query::parse(q).unwrap_or_else(|| usage());
             let docs = vault::load_docs(&vp);
+            // 命中笔记条数上限: 推荐 --limit=N (--max=N 保留为兼容别名)
             let max: usize = flags
                 .iter()
-                .find_map(|f| f.strip_prefix("--max=").and_then(|v| v.parse().ok()))
+                .find_map(|f| f.strip_prefix("--limit=").and_then(|v| v.parse().ok()))
+                .or_else(|| flags.iter().find_map(|f| f.strip_prefix("--max=").and_then(|v| v.parse().ok())))
                 .unwrap_or(20);
             let mode = flags
                 .iter()

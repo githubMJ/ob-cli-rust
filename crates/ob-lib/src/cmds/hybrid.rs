@@ -18,7 +18,8 @@ pub fn run_hybrid(ctx: &Ctx) {
             let docs = vault::load_docs(&vp);
             let max: usize = flags
                 .iter()
-                .find_map(|f| f.strip_prefix("--max=").and_then(|v| v.parse().ok()))
+                .find_map(|f| f.strip_prefix("--limit=").and_then(|v| v.parse().ok()))
+                .or_else(|| flags.iter().find_map(|f| f.strip_prefix("--max=").and_then(|v| v.parse().ok())))
                 .unwrap_or(5);
             let mut hits: Vec<&Doc> = Vec::new();
             for d in &docs {
