@@ -49,6 +49,10 @@ pub fn parse_cli() -> (String, Ctx) {
         i += 1;
     }
     let cmd = pos_args.first().cloned().unwrap_or_default();
+    // help 子命令不需要 vault
+    if cmd == "help" {
+        return (cmd, Ctx { vp: PathBuf::new(), flags, pos_args, kv });
+    }
     // workspace 必传: 所有检索/操作都限制在指定目录内
     let vp = match vault_flag.or_else(|| std::env::var("OBSIDIAN_VAULT").ok()) {
         Some(p) => PathBuf::from(p),

@@ -15,6 +15,7 @@ fn main() {
     }
     let (cmd, ctx) = ob_lib::parse_cli();
     match cmd.as_str() {
+        "help" => ob_lib::common::help(),
         "search" => cmds::search::run_search(&ctx),
         "backlinks" => cmds::links::run_backlinks(&ctx),
         "links" => cmds::links::run_links(&ctx),
