@@ -180,6 +180,20 @@ impl Parser {
     }
 }
 
+/// 模糊子序列匹配: 按顺序包含所有字符 (允许间隔)
+pub fn fuzzy_contains(haystack: &str, needle: &str) -> bool {
+    let h: Vec<char> = haystack.to_lowercase().chars().collect();
+    let n: Vec<char> = needle.to_lowercase().chars().collect();
+    if n.is_empty() { return true; }
+    let mut hi = 0;
+    for nc in &n {
+        while hi < h.len() && h[hi] != *nc { hi += 1; }
+        if hi >= h.len() { return false; }
+        hi += 1;
+    }
+    true
+}
+
 pub fn parse(q: &str) -> Option<Node> {
     let mut p = Parser { toks: tokenize(q), pos: 0 };
     p.parse_or()
@@ -187,11 +201,16 @@ pub fn parse(q: &str) -> Option<Node> {
 
 // ---------- 匹配 ----------
 pub fn match_doc(doc: &Doc, node: &Node) -> bool {
+    match_doc_mode(doc, node, false)
+}
+
+pub fn match_doc_mode(doc: &Doc, node: &Node, fuzzy: bool) -> bool {
     match node {
+        Node::Word(w) => if fuzzy { fuzzy_contains(&doc.lower, w) } else { doc.lower.contains(w) },
+        Node::Phrase(w) => if fuzzy { fuzzy_contains(&doc.lower, w) } else { doc.lower.contains(w) },
         Node::And(kids) => kids.iter().all(|k| match_doc(doc, k)),
         Node::Or(kids) => kids.iter().any(|k| match_doc(doc, k)),
         Node::Not(k) => !match_doc(doc, k),
-        Node::Word(w) | Node::Phrase(w) => doc.lower.contains(w),
         Node::Path(v) => doc.rel.to_lowercase().contains(&v.to_lowercase()),
         Node::File(v) => doc.base.to_lowercase().contains(&v.to_lowercase()),
         Node::Tag(t) => doc.has_tag(t),
