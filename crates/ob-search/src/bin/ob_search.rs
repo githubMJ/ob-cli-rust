@@ -17,6 +17,14 @@ USAGE:
 }
 
 fn main() {
+    let argv: Vec<String> = std::env::args().skip(1).collect();
+    if argv.iter().any(|a| a == "--help" || a == "-h") {
+        ob_lib::common::help();
+    }
+    if argv.iter().any(|a| a == "--version" || a == "-V") {
+        println!("ob-search {}", env!("CARGO_PKG_VERSION"));
+        std::process::exit(0);
+    }
     let (cmd, ctx) = ob_lib::parse_cli();
     match cmd.as_str() {
         "search" => cmds::search::run_search(&ctx),
