@@ -11,7 +11,7 @@ BINARIES:
   ob-cli      总入口 | Unified entry
 
 USAGE:
-  ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex|graph|link] [--max-chars N] [--json] [--max N]
+  ob-cli search <query>        [--path <vault>] [--lines] [--paragraph] [--context N] [--fuzzy] [--mode exact|fuzzy|regex|graph|link] [--max-chars N] [--max-lines N] [--json] [--max N]
   ob-cli backlinks <note>      [--path <vault>] [--json]
   ob-cli links <note>          [--path <vault>]
   ob-cli hybrid <query>        [--path <vault>] [--max N]
@@ -36,6 +36,7 @@ SEARCH MODES (--mode):
   exact   substring match (default, 子串匹配)
   fuzzy   subsequence match (模糊匹配, 容忍缺字/乱序)
   regex   regular expression (正则表达式)
+  (--max = 命中笔记条数上限 | --max-lines = 每篇笔记的命中行数上限 | --max-chars = 每个内容块字符上限)
   graph      keyword hits + n-hop link BFS (图检索, 配合 --depth)
   link       keyword hits + bidirectional link neighbors (双向链检索)
   backlinks  query 为笔记名, 返回引用它的笔记 (反向链接)

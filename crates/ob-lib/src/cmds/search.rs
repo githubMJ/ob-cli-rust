@@ -24,6 +24,11 @@ pub fn run_search(ctx: &Ctx) {
                 .iter()
                 .find_map(|f| f.strip_prefix("--max-chars=").and_then(|v| v.parse().ok()))
                 .unwrap_or(0);
+            // 每篇笔记的命中行数上限 (lines/context 粒度), 0=不限制
+            let max_lines: usize = flags
+                .iter()
+                .find_map(|f| f.strip_prefix("--max-lines=").and_then(|v| v.parse().ok()))
+                .unwrap_or(0);
             let ctx: usize = flags
                 .iter()
                 .find_map(|f| f.strip_prefix("--context=").and_then(|v| v.parse().ok()))
@@ -191,6 +196,7 @@ pub fn run_search(ctx: &Ctx) {
                         let dl: Vec<&str> = m.content.split('\n').collect();
                         let ctx = if ctxn > 0 { ctxn } else { 0 };
                         for (i, line) in dl.iter().enumerate() {
+                            if max_lines > 0 && matches.len() >= max_lines { break; }
                             if line.to_lowercase().contains(&q.to_lowercase()) {
                                 let s2 = i.saturating_sub(ctx);
                                 let e2 = (i + ctx + 1).min(dl.len());
@@ -293,8 +299,11 @@ pub fn run_search(ctx: &Ctx) {
                     }
                 } else if ctx > 0 {
                     let dl: Vec<&str> = d_lines(m);
+                    let mut line_count = 0usize;
                     for (i, line) in dl.iter().enumerate() {
+                        if max_lines > 0 && line_count >= max_lines { break; }
                         if line.to_lowercase().contains(&q.to_lowercase()) {
+                            line_count += 1;
                             let s2 = i.saturating_sub(ctx);
                             let e2 = (i + ctx + 1).min(dl.len());
                             for (j, l) in dl[s2..e2].iter().enumerate() {
