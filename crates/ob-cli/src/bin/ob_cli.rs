@@ -1,8 +1,8 @@
 // ob-cli — 总入口: 全命令路由 + MCP server
 #[path = "../mcp.rs"]
 mod mcp;
-use ob_core::cmds;
-use ob_core::common;
+use ob_lib::cmds;
+use ob_lib::common;
 
 fn usage() -> ! {
     eprintln!(
@@ -20,7 +20,7 @@ MODULES:
 }
 
 fn main() {
-    let (cmd, ctx) = ob_core::parse_cli();
+    let (cmd, ctx) = ob_lib::parse_cli();
     match cmd.as_str() {
         "search" => cmds::search::run_search(&ctx),
         "backlinks" => cmds::links::run_backlinks(&ctx),

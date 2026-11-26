@@ -25,15 +25,15 @@ target/release/ob-cli-rust
 
 | 二进制 | 职责 | 命令 |
 |---|---|---|
-| **ob-search** | 检索模块 | search(语法/模糊/段落/上下文/JSON)、backlinks、links、hybrid、graph |
-| **ob-ops** | 操作模块 | create、print、list、move、delete、frontmatter、tags、orphans、unresolved、hdaily |
-| **ob-cli** | 总入口 + MCP | 以上全部命令自动路由 + serve (MCP stdio server) |
+| **ob-search** | 检索模块 | Retrieval: search(语法/模糊/段落/上下文/JSON)、backlinks、links、hybrid、graph |
+| **ob-core** | 核心操作模块 | Core operations: create、print、list、move、delete、frontmatter、tags、orphans、unresolved、hdaily |
+| **ob-cli** | 总入口 + MCP | Unified entry: 以上全部命令自动路由 + serve (MCP stdio server) |
 
 Cargo workspace，四个 crate：
 
 ```
 crates/
-├── ob-core/            # 共享核心 crate
+├── ob-lib/             # 共享库 crate
 │   ├── src/lib.rs      # + CLI 参数解析 (三二进制共用)
 │   ├── src/common.rs   # 【共享】Ctx 上下文、usage、笔记查找、行工具
 │   ├── src/vault.rs    # 【文档层】vault 遍历、文档模型、frontmatter/行内标签解析、链接索引
@@ -48,7 +48,7 @@ crates/
 │       ├── docs.rs     #   create/print/list/move/delete/frontmatter/hdaily
 │       └── stats.rs    #   tags/orphans/unresolved
 ├── ob-search/          # 检索二进制
-├── ob-ops/             # 操作二进制
+├── ob-core/            # 核心操作二进制
 └── ob-cli/             # 总入口 + MCP server (src/mcp.rs)
 ```
 

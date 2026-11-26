@@ -9,5 +9,5 @@ name = "ob-cli"
 path = "src/bin/ob_cli.rs"
 
 [dependencies]
-ob-core = { path = "../ob-core" }
+ob-lib = { path = "../ob-lib" }
 regex = "1"

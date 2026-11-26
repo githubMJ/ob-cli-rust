@@ -1,10 +1,10 @@
-// ob-ops — 操作模块 | Operations module
-use ob_core::cmds;
-use ob_core::common;
+// ob-core — 核心操作模块 | Core operations module | Operations module
+use ob_lib::cmds;
+use ob_lib::common;
 
 fn usage() -> ! {
     eprintln!(
-        "ob-ops — 操作模块 | Operations module
+        "ob-core — 核心操作模块 | Core operations module | Operations module
 
 USAGE:
   ob-ops create <title> [--content <text>] [--path <vault>]
@@ -22,7 +22,7 @@ USAGE:
 }
 
 fn main() {
-    let (cmd, ctx) = ob_core::parse_cli();
+    let (cmd, ctx) = ob_lib::parse_cli();
     match cmd.as_str() {
         "create" => cmds::docs::run_create(&ctx),
         "print" => cmds::docs::run_print(&ctx),
