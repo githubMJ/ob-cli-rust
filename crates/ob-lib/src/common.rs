@@ -10,29 +10,35 @@ WORKSPACE:
   All commands require --path <vault-dir> (or env OBSIDIAN_VAULT). Access is confined to that directory.
 
 BINARIES:
-  ob-search   检索模块 | Retrieval: search/backlinks/links/hybrid/graph
-  ob-core     核心操作模块 | Core operations: create/print/list/move/delete/frontmatter/tags/...
-  ob-cli      总入口 | Unified entry: all commands above + automatic routing
+  ob-cli     统一入口 | Unified entry: 所有命令 (推荐)
 
-COMMANDS:
-  search <query>        全文检索 (默认附带每条命中的双向链接邻居)
-                        Full-text search; every hit includes its bidirectional link neighbors.
-  backlinks <note>      反向链接 | Notes that reference the given note.
-  links <note>          正向链接 | Wiki links inside the given note.
-  hybrid <query>        混合检索 | Keyword hits + 1-hop link expansion.
-  graph <note>          图检索 | n-hop bidirectional BFS from a note (--depth N).
-  list                  列出全部笔记 | List all notes (relative paths).
-  print <note>          打印全文 | Print full note content (byte-identical).
-  create <title>        创建/覆盖笔记 | Create or overwrite; --content text; --file src to import a local file.
-  append <note>         追加内容 | Append --content text to note end.
-  move <from> <to>      移动/重命名 | Move or rename; updates all wiki links vault-wide.
-  delete <note>         删除 | Delete (--force skips confirmation).
-  frontmatter <note>    YAML 属性 | get / set key val / remove key.
-  tags [tag]            标签 | Tag counts, or notes having a tag (frontmatter + inline #tag).
-  dirs                  目录结构 | List directory tree.
-  orphans               孤立笔记 | Notes with no inbound links.
-  unresolved            断链 | Wiki links pointing to non-existent notes.
-  hdaily [dir]          每日笔记 | Create/show today's daily note (default dir: 05-Daily).
+检索 (SQLite FTS5 + 双向链接图传播):
+  index                 构建索引 | Build index (<vault> --index-path <dir>)
+                          默认全量 (约 3-4s); 加 --incremental 只更新变化的 (约 100ms)
+  sync                  index --incremental 的别名 (兼容保留)
+  search <query>        检索 | Search: FTS5 BM25 + 一跳图传播
+                          --hops=0|1|2    图传播跳数 (0=纯词法)
+                          --limit=N       条数上限 (默认 20)
+                          --json          结构化输出
+                          --backlinks     附带反链字段
+  search --discover     渐进发现 | Structured discovery (AI 首轮)
+                          --page=N        翻页 (0 起)
+  search --note <path>  下钻 | Drill into a note (AI 后续轮)
+                          --from <prev>   上一级标题 (生成 breadcrumb 供回退)
+
+笔记操作:
+  list                  列出全部笔记 | List all notes (relative paths)
+  print <note>          打印全文 | Print full note content
+  create <title>        创建/覆盖 | Create or overwrite (--content text | --file src)
+  append <note>         追加内容 | Append content (--content text)
+  move <from> <to>      移动/重命名 | Move or rename (updates links)
+  delete <note>         删除 | Delete (--force skips confirmation)
+  frontmatter <note>    YAML 属性 | get / set key val / remove key
+  tags [tag]            标签统计 | Tag counts or notes with tag
+  dirs                  目录结构 | Directory tree
+  orphans               孤立笔记 | Notes with no links
+  unresolved            断链 | Broken wiki links
+  hdaily [dir]          每日笔记 | Daily note
   help                  完整手册 | Show this manual.
 
 QUERY SYNTAX (search, 与 Obsidian 兼容):

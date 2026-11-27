@@ -44,7 +44,7 @@ fn main() {
         "orphans" => cmds::stats::run_orphans(&ctx),
         "unresolved" => cmds::stats::run_unresolved(&ctx),
         "hdaily" => cmds::docs::run_hdaily(&ctx),
-        "append" => {
+"append" => {
             let (title, content) = (ctx.pos_args.get(1).cloned().unwrap_or_else(|| usage()),
                                     ctx.kv.iter().find(|(k,_)| k=="content").map(|(_,v)| v.clone()).unwrap_or_default());
             ob_lib::crud::append(&ctx.vp, &title, &content);

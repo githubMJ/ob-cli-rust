@@ -11,6 +11,9 @@ pub struct Doc {
     pub lower: String,
     pub lines: Vec<String>,
     pub tags: Vec<String>,
+    pub aliases: Vec<String>,
+    pub links_out: Vec<String>,
+    pub mtime: i64,   // 文件修改时间 (秒), 用于增量同步
 }
 
 impl Doc {
@@ -90,40 +93,28 @@ fn parse_inline_tags(content: &str) -> Vec<String> {
 /// 遍历 vault, 返回所有 .md 文档 (跳过隐藏目录)
 /// 优化: 按顶层子目录并行读取 (std scoped threads, 无额外依赖)
 pub fn load_docs(vault: &Path) -> Vec<Doc> {
-    // 收集顶层条目: 子目录 + 根目录文件
-    let mut subdirs: Vec<PathBuf> = Vec::new();
-    let mut root_files: Vec<PathBuf> = Vec::new();
-    if let Ok(rd) = fs::read_dir(vault) {
-        let mut entries: Vec<PathBuf> = rd.filter_map(|e| e.ok()).map(|e| e.path()).collect();
-        entries.sort();
-        for path in entries {
-            let name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
-            if name.starts_with('.') {
-                continue;
-            }
-            if path.is_dir() {
-                subdirs.push(path);
-            } else if name.to_lowercase().ends_with(".md") {
-                root_files.push(path);
-            }
-        }
-    }
+    let root = vault.to_path_buf();
+    // 阶段 1: 收集全部 md 路径 (纯目录遍历, 很快)
+    let mut files: Vec<PathBuf> = Vec::new();
+    collect_md_paths_into(&root, &root, &mut files);
+
+    // 阶段 2: 均分给线程并行读取 (每批 512 个文件)
+    const BATCH: usize = 512;
+    let batches: Vec<Vec<PathBuf>> = files.chunks(BATCH).map(|c| c.to_vec()).collect();
     let mut handles = Vec::new();
-    // 每个顶层子目录一个并行任务
-    for dir in subdirs {
+    for batch in batches {
+        let r = root.clone();
         handles.push(std::thread::spawn(move || {
-            let mut docs = Vec::new();
-            walk_into(&dir, &mut docs);
+            let mut docs = Vec::with_capacity(batch.len());
+            for path in batch {
+                if let Some(d) = read_doc(&r, &path) {
+                    docs.push(d);
+                }
+            }
             docs
         }));
     }
-    // 根文件主线程处理
-    let mut docs = Vec::new();
-    for path in root_files {
-        if let Some(d) = read_doc(vault, &path) {
-            docs.push(d);
-        }
-    }
+    let mut docs = Vec::with_capacity(files.len());
     for h in handles {
         if let Ok(mut part) = h.join() {
             docs.append(&mut part);
@@ -133,23 +124,61 @@ pub fn load_docs(vault: &Path) -> Vec<Doc> {
     docs
 }
 
-fn walk_into(dir: &Path, docs: &mut Vec<Doc>) {
-    walk(dir, dir.parent().unwrap_or(dir), docs);
+/// 收集全部 .md 路径 (跳过隐藏目录)
+pub fn collect_md_paths_into(_root: &Path, dir: &Path, files: &mut Vec<PathBuf>) {
+    let mut entries: Vec<PathBuf> = match fs::read_dir(dir) {
+        Ok(rd) => rd.filter_map(|e| e.ok()).map(|e| e.path()).collect(),
+        Err(_) => return,
+    };
+    entries.sort();
+    for path in entries {
+        let name = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+        if path.is_dir() {
+            if name.starts_with('.') {
+                continue;
+            }
+            collect_md_paths_into(dir, &path, files);
+        } else if name.to_lowercase().ends_with(".md") {
+            files.push(path);
+        }
+    }
+}
+
+/// 仅收集 .md 文件路径 (不读内容)
+pub fn collect_md_paths(vault: &Path) -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    collect_md_paths_into(vault, vault, &mut files);
+    files
+}
+
+/// 加载单个文件 (供增量同步使用)
+pub fn load_one(vault: &Path, path: &Path) -> Option<Doc> {
+    read_doc(vault, path)
 }
 
 fn read_doc(vault: &Path, path: &Path) -> Option<Doc> {
     let content = fs::read_to_string(path).ok()?;
     let rel = path.strip_prefix(vault).ok()?.to_string_lossy().to_string();
     let base = path.file_name()?.to_string_lossy().trim_end_matches(".md").to_string();
-    let mut tags = parse_frontmatter_tags(&content);
-    tags.extend(parse_inline_tags(&content));
+    // 统一走 parse 模块 (pulldown-cmark, 排除代码块, 支持别名/块引用/嵌入)
+    let parsed = crate::parse::parse_note(&content);
+    let links_out = crate::parse::extract_link_targets(&parsed);
+    let mtime = fs::metadata(path)
+        .ok()
+        .and_then(|m| m.modified().ok())
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0);
     Some(Doc {
         rel,
         base,
         lower: content.to_lowercase(),
         content,
         lines: Vec::new(),
-        tags,
+        tags: parsed.tags,
+        aliases: parsed.aliases,
+        links_out,
+        mtime,
     })
 }
 

@@ -2,8 +2,10 @@
 pub mod cmds;
 pub mod common;
 pub mod crud;
+pub mod parse;
 pub mod json;
 pub mod query;
+pub mod store;
 pub mod vault;
 
 use common::Ctx;
@@ -23,6 +25,81 @@ pub fn parse_cli() -> (String, Ctx) {
             vault_flag = args.get(i + 1).cloned();
             i += 2;
             continue;
+        } else if let Some(v) = a.strip_prefix("--index-path") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("index-path".into(), val.clone()));
+            flags.push(format!("--index-path={val}"));
+        } else if let Some(name) = ["--limit", "--hops", "--page", "--depth", "--max-chars", "--max-lines", "--context", "--top"]
+                .iter()
+                .find(|n| a == **n || a.starts_with(&format!("{n}=")))
+        {
+            let val = if let Some((_, v)) = a.split_once('=') {
+                v.to_string()
+            } else {
+                let v = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v
+            };
+            flags.push(format!("{name}={val}"));
+            kv.push((name.trim_start_matches("--").to_string(), val));
+        } else if let Some(v) = a.strip_prefix("--keyword") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("keyword".into(), val.clone()));
+            flags.push(format!("--keyword={val}"));
+        } else if a == "--index-doc" {
+            flags.push("--index-doc".into());
+        } else if let Some(v) = a.strip_prefix("--read") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("read".into(), val.clone()));
+            flags.push(format!("--read={val}"));
+        } else if let Some(v) = a.strip_prefix("--files") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("files".into(), val.clone()));
+            flags.push(format!("--files={val}"));
+        } else if let Some(v) = a.strip_prefix("--note") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("note".into(), val.clone()));
+            flags.push(format!("--note={val}"));
+        } else if let Some(v) = a.strip_prefix("--from") {
+            let val = if let Some(v2) = v.strip_prefix('=') {
+                v2.to_string()
+            } else {
+                let v2 = args.get(i + 1).cloned().unwrap_or_default();
+                i += 1;
+                v2
+            };
+            kv.push(("from".into(), val.clone()));
+            flags.push(format!("--from={val}"));
         } else if let Some(v) = a.strip_prefix("--file") {
             if let Some(val) = v.strip_prefix('=') {
                 kv.push(("file".into(), val.to_string()));

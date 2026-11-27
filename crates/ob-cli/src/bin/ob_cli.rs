@@ -5,6 +5,7 @@ use ob_lib::common;
 use ob_lib::common::usage;
 
 fn main() {
+    let t_main = std::time::Instant::now();
     let argv: Vec<String> = std::env::args().skip(1).collect();
     if argv.iter().any(|a| a == "--help" || a == "-h") {
         ob_lib::common::help();
@@ -17,6 +18,9 @@ fn main() {
     match cmd.as_str() {
         "help" => ob_lib::common::help(),
         "search" => cmds::search::run_search(&ctx),
+        "drill" => cmds::drill::run_drill(&ctx),
+        "index" => cmds::docs::run_index(&ctx),
+        "sync" => cmds::docs::run_sync(&ctx),
         "backlinks" => cmds::links::run_backlinks(&ctx),
         "links" => cmds::links::run_links(&ctx),
         "hybrid" => cmds::hybrid::run_hybrid(&ctx),
